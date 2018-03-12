@@ -1,0 +1,178 @@
+---
+title: "geocoder"
+output: html_notebook
+---
+```{r}
+library(ggmap)
+library(ggplot2)
+library(spatstat)
+```
+
+To check the number of remaining geocode queries for the day.
+```{r}
+geocodeQueryCheck()
+```
+
+FOR LEGAL
+
+```{r}
+origAdd <- read.csv("legallatest.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# # geocoded <- data.frame(stringsAsFactors = FALSE)
+   g <- geocode("138 Market St #36-03 CapitaGreen Singapore 048946", output = "latlon")
+  as.numeric(g[2])
+# # # ?geocode
+   print(g)
+# # plot(1.352554,103.9551)
+```
+
+
+```{r}
+  # # Print("Working...")
+  #  r <- geocode(origAdd$postal_code[3], output = "latlon", source = "google")
+  # # # origAdd$lat[2] <- as.numeric(r[2])
+  # # # origAdd$lon[2] <- as.numeric(r[1])
+  # # # #origAdd$geoAddress[1] <- as.character(r[3])
+  #  print(r)
+  # summary(r)
+  # result <- NULL
+   #print(result)
+```
+
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAdd data frame in new columns lat and lon
+for(i in 1:nrow(origAdd))
+{
+  result <- geocode(origAdd$postal_code[i], output = "latlon", source = "google")
+  
+  while(is.na(result)) {
+    print("inside")
+    result <- geocode(origAdd$postal_code[i], output = "latlon", source = "google")
+    Sys.sleep(1)
+  }
+  
+  while(as.numeric(result[2]) > 2 || is.na(result)) {
+    print("inside if")
+    result <- geocode(origAdd$vectorAddress[i], output = "latlon", source = "google")
+  }
+  
+  origAdd$lat[i] <- as.numeric(result[2])
+  origAdd$lon[i] <- as.numeric(result[1])
+}
+write.csv(origAdd, "geocodedLegal.csv", row.names=FALSE)
+```
+
+FOR BANK
+```{r}
+origAddBank <- read.csv("bank.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAdd data frame in new columns lat and lon
+for(i in 1:nrow(origAddBank))
+{
+  result <- geocode(origAddBank$postal_code[i], output = "latlon", source = "google")
+  
+  while(is.na(result)) {
+    print("inside")
+    result <- geocode(origAddBank$postal_code[i], output = "latlon", source = "google")
+    Sys.sleep(1)
+  }
+  
+  while(as.numeric(result[2]) > 2 || is.na(result)) {
+    print("inside if")
+    result <- geocode(origAddBank$vectorAddress[i], output = "latlon", source = "google")
+  }
+  
+  origAddBank$lat[i] <- as.numeric(result[2])
+  origAddBank$lon[i] <- as.numeric(result[1])
+}
+write.csv(origAddBank, "geocodedBank.csv", row.names=FALSE)
+```
+
+FOR ACCOUNTING
+```{r}
+origAddAcct <- read.csv("acct.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAdd data frame in new columns lat and lon
+for(i in 1:nrow(origAddAcct))
+{
+  result <- geocode(origAddAcct$postal_code[i], output = "latlon", source = "google")
+  while(is.na(result)) {
+    print("inside")
+    result <- geocode(origAddAcct$postal_code[i], output = "latlon", source = "google")
+    Sys.sleep(1)
+  }
+  
+  while(as.numeric(result[2]) > 2 || is.na(result)) {
+    print("inside if")
+    result <- geocode(origAddAcct$vectorAddress[i], output = "latlon", source = "google")
+  }
+}
+write.csv(origAddAcct, "geocodedAcct.csv", row.names=FALSE)
+```
+
+FOR ARCHITECTURAL
+```{r}
+origAddArchitect <- read.csv("Architectural.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAdd data frame in new columns lat and lon
+for(i in 1:nrow(origAddArchitect))
+{
+  result <- geocode(origAddArchitect$postal_code[i], output = "latlon", source = "google")
+  while(is.na(result)) {
+    print("inside")
+    result <- geocode(origAddArchitect$postal_code[i], output = "latlon", source = "google")
+  }
+  
+  while(as.numeric(result[2]) > 2 || is.na(result)) {
+    print("inside if")
+    result <- geocode(origAddArchitect$vectorAddress[i], output = "latlon", source = "google")
+  }
+  
+  origAddArchitect$lat[i] <- as.numeric(result[2])
+  origAddArchitect$lon[i] <- as.numeric(result[1])
+  Sys.sleep(1)
+}
+write.csv(origAddArchitect, "geocodedArchitect.csv", row.names=FALSE)
+```
+
+FOR CONSULTANCY
+```{r}
+origAddConsult <- read.csv("Consultancy.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAdd data frame in new columns lat and lon
+for(i in 1:nrow(origAddConsult))
+{
+  result <- geocode(origAddConsult$postal_code[i], output = "latlon", source = "google")
+  while(is.na(result)) {
+    print("inside")
+    result <- geocode(origAddConsult$postal_code[i], output = "latlon", source = "google")
+  }
+  
+  while(as.numeric(result[2]) > 2 || is.na(result)) {
+    print("inside if")
+    result <- geocode(origAddConsult$vectorAddress[i], output = "latlon", source = "google")
+  }
+  
+  origAddConsult$lat[i] <- as.numeric(result[2])
+  origAddConsult$lon[i] <- as.numeric(result[1])
+  Sys.sleep(1)
+}
+write.csv(origAddConsult, "geocodedConsult.csv", row.names=FALSE)
+```
+
