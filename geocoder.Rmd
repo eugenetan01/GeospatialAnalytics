@@ -13,34 +13,16 @@ To check the number of remaining geocode queries for the day.
 geocodeQueryCheck()
 ```
 
+To check over query limit
+```{r}
+  r <- geocode("17 Up Circular Rd #03-00 Juta Bldg Singapore 058415", output = "latlon", source = "google")
+```
+
 FOR LEGAL
 
 ```{r}
 origAdd <- read.csv("legallatest.csv", stringsAsFactors = FALSE)
 ```
-
-```{r}
-# # geocoded <- data.frame(stringsAsFactors = FALSE)
-   g <- geocode("138 Market St #36-03 CapitaGreen Singapore 048946", output = "latlon")
-  as.numeric(g[2])
-# # # ?geocode
-   print(g)
-# # plot(1.352554,103.9551)
-```
-
-
-```{r}
-  # # Print("Working...")
-  #  r <- geocode(origAdd$postal_code[3], output = "latlon", source = "google")
-  # # # origAdd$lat[2] <- as.numeric(r[2])
-  # # # origAdd$lon[2] <- as.numeric(r[1])
-  # # # #origAdd$geoAddress[1] <- as.character(r[3])
-  #  print(r)
-  # summary(r)
-  # result <- NULL
-   #print(result)
-```
-
 
 ```{r}
 # Loop through the addresses to get the latitude and longitude of each address and add it to the
@@ -116,6 +98,9 @@ for(i in 1:nrow(origAddAcct))
     print("inside if")
     result <- geocode(origAddAcct$vectorAddress[i], output = "latlon", source = "google")
   }
+  
+  origAddAcct$lat[i] <- as.numeric(result[2])
+  origAddAcct$lon[i] <- as.numeric(result[1])
 }
 write.csv(origAddAcct, "geocodedAcct.csv", row.names=FALSE)
 ```
@@ -143,7 +128,6 @@ for(i in 1:nrow(origAddArchitect))
   
   origAddArchitect$lat[i] <- as.numeric(result[2])
   origAddArchitect$lon[i] <- as.numeric(result[1])
-  Sys.sleep(1)
 }
 write.csv(origAddArchitect, "geocodedArchitect.csv", row.names=FALSE)
 ```
@@ -171,7 +155,6 @@ for(i in 1:nrow(origAddConsult))
   
   origAddConsult$lat[i] <- as.numeric(result[2])
   origAddConsult$lon[i] <- as.numeric(result[1])
-  Sys.sleep(1)
 }
 write.csv(origAddConsult, "geocodedConsult.csv", row.names=FALSE)
 ```
