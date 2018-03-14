@@ -1,0 +1,30 @@
+---
+title: "Mapping"
+output: html_notebook
+---
+
+Retrieve lon and lat
+```{r}
+library(ggmap)
+library(ggplot2)
+library(tmap)
+library(sf)
+firms <- read.csv("geocodedCombined.csv", stringsAsFactors = FALSE)
+```
+
+Convert csv file to shapefile
+```{r}
+firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
+class(firms_shp)
+summary(firms_shp)
+```
+
+```{r}
+tmap_mode("view")
+tm_shape(firms_shp) +
+  tm_dots(col = "type", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+?tm_dots
+```
+
+
+
