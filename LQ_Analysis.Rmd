@@ -1,0 +1,233 @@
+---
+title: "LQ Analysis"
+output: html_notebook
+---
+
+```{r}
+library(ggmap)
+library(ggplot2)
+library(tmap)
+library(sf)
+library(lctools)
+library(amap)
+firms <- read.csv("geocodedCombined.csv", stringsAsFactors = FALSE)
+```
+
+Categorize firms according to firm type
+```{r}
+firms_legal <- firms[grep("Legal", firms$type), ]
+firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+firms_architectural <- firms[grep("Architectural", firms$type), ]
+firms_bank <- firms[grep("Bank", firms$type), ]
+firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+```
+
+#FOR LEGAL
+Get legal companies in CBD
+1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
+(CBD areas are postal codes that start with 01,02,03,04,05,06)
+```{r}
+legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_legal$postal_code), ]
+```
+
+Calculate no. of legal companies in CBD
+```{r}
+legal_cbd_count <- nrow(legal_cbd)
+```
+
+Get all companies in CBD
+```{r}
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+```
+
+Calculate no. of companies in CBD
+```{r}
+all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of legal companies in country
+```{r}
+legal_country_count <- nrow(firms_legal)
+```
+
+Calculate no. of companies in country
+```{r}
+all_country_count <- nrow(firms)
+```
+
+Compute location quotient of legal firms
+```{r}
+locq(legal_cbd_count, all_cbd_count, legal_country_count, all_country_count)
+```
+LQ Analysis:
+If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
+If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+#FOR CONSULTANCY
+Get consultancy companies in CBD
+1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
+(CBD areas are postal codes that start with 01,02,03,04,05,06)
+```{r}
+consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_consultancy$postal_code), ]
+```
+
+Calculate no. of consultancy companies in CBD
+```{r}
+consultancy_cbd_count <- nrow(consultancy_cbd)
+```
+
+Get all companies in CBD
+```{r}
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+```
+
+Calculate no. of companies in CBD
+```{r}
+all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of consultancy companies in country
+```{r}
+consultancy_country_count <- nrow(firms_consultancy)
+```
+
+Calculate no. of companies in country
+```{r}
+all_country_count <- nrow(firms)
+```
+
+Compute location quotient of consultancy firms
+```{r}
+locq(consultancy_cbd_count, all_cbd_count, consultancy_country_count, all_country_count)
+```
+LQ Analysis:
+If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
+If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+#FOR ARCHITECTURAL
+Get architectural companies in CBD
+1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
+(CBD areas are postal codes that start with 01,02,03,04,05,06)
+```{r}
+architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_architectural$postal_code), ]
+```
+
+Calculate no. of legal companies in CBD
+```{r}
+architectural_cbd_count <- nrow(architectural_cbd)
+```
+
+Get all companies in CBD
+```{r}
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+```
+
+Calculate no. of companies in CBD
+```{r}
+all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of architectural companies in country
+```{r}
+architectural_country_count <- nrow(firms_architectural)
+```
+
+Calculate no. of companies in country
+```{r}
+all_country_count <- nrow(firms)
+```
+
+Compute location quotient of architectural firms
+```{r}
+locq(architectural_cbd_count, all_cbd_count, architectural_country_count, all_country_count)
+```
+LQ Analysis:
+If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
+If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+#FOR BANK
+Get bank firms in CBD
+1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
+(CBD areas are postal codes that start with 01,02,03,04,05,06)
+```{r}
+bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_bank$postal_code), ]
+```
+
+Calculate no. of bank firms in CBD
+```{r}
+bank_cbd_count <- nrow(bank_cbd)
+```
+
+Get all companies in CBD
+```{r}
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+```
+
+Calculate no. of companies in CBD
+```{r}
+all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of bank firms in country
+```{r}
+bank_country_count <- nrow(firms_bank)
+```
+
+Calculate no. of companies in country
+```{r}
+all_country_count <- nrow(firms)
+```
+
+Compute location quotient of bank firms
+```{r}
+locq(bank_cbd_count, all_cbd_count, bank_country_count, all_country_count)
+```
+LQ Analysis:
+If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
+If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+#FOR ACCOUNTANCY
+Get accountancy firms in CBD
+1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
+(CBD areas are postal codes that start with 01,02,03,04,05,06)
+```{r}
+accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_accountancy$postal_code), ]
+```
+
+Calculate no. of accountancy firms in CBD
+```{r}
+accountancy_cbd_count <- nrow(accountancy_cbd)
+```
+
+Get all companies in CBD
+```{r}
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+```
+
+Calculate no. of companies in CBD
+```{r}
+all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of accountancy firms in country
+```{r}
+accountancy_country_count <- nrow(firms_accountancy)
+```
+
+Calculate no. of companies in country
+```{r}
+all_country_count <- nrow(firms)
+```
+
+Compute location quotient of accountancy firms
+```{r}
+locq(accountancy_cbd_count, all_cbd_count, accountancy_country_count, all_country_count)
+```
+LQ Analysis:
+If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
+If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
