@@ -39,9 +39,9 @@ ui <- fluidPage(
                         selected = "Legal"),
             sliderInput("distance",
                        "Distance value:",
-                       min = 1000,
-                       max = 10000,
-                       value = 1300)
+                       min = 100,
+                       max = 1000,
+                       value = 280)
           )
       
       # Show a plot of the generated distribution
@@ -98,7 +98,7 @@ server <- function(input, output) {
     firms_sp1 = as(firms_shp, 'Spatial')
     firms_sp2 = as(firms_sp1, 'SpatialPoints')
     
-    subzones <- readOGR(dsn="shp/master-plan-2014-subzone-boundary-no-sea", layer="MP14_SUBZONE_NO_SEA_PL")
+    mpsz <- readOGR(dsn="shp/MP14-PLNG_AREA", layer="MP14_PLNG_AREA_NO_SEA_PL")
     subzone_cr <- subzones[subzones$REGION_C == "CR",]
     cr_sp = as(subzone_cr, 'SpatialPolygons')
     

@@ -10,6 +10,7 @@ library(tmap)
 library(sf)
 library(lctools)
 library(amap)
+library(REAT)
 firms <- read.csv("geocodedCombined.csv", stringsAsFactors = FALSE)
 ```
 
@@ -145,6 +146,7 @@ locq(architectural_cbd_count, all_cbd_count, architectural_country_count, all_co
 ```
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
+
 
 If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
 
