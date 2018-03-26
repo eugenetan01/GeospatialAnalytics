@@ -6,40 +6,52 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+#Interactive link view 
 library(shiny)
+library(leaflet)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-   
-   # Application title
-   titlePanel("REMGIS"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-         sidebarPanel(
+   div(class="outer",
+       tags$head(
+         includeCSS("styles.css")
+       ),
+       leafletOutput("distPlot"),
+       absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                   draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                   width = 330, height = "auto",
+                   
+                   h2("REMGIS"),
+     
             fileInput("file1", "Choose CSV File",
-                  accept = c(
-                    "text/csv",
-                    "text/comma-separated-values,text/plain",
-                    ".csv")
-          ), 
-         sliderInput("distance",
-                     "Distance value:",
-                     min = 1000,
-                     max = 10000,
-                     value = 2000)
-      ),
+                    accept = c(
+                      "text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv")
+            ), 
+            selectInput(inputId="sector",
+                        label="Sector:",
+                        choices=c("Legal" = "Legal",
+                                  "Banking" = "Bank",
+                                  "Consultancy" = "Consultancy",
+                                  "Accounting" = "Accountacy",
+                                  "Architectural" = "Architectural"),
+                        selected = "Legal"),
+            sliderInput("distance",
+                       "Distance value:",
+                       min = 1000,
+                       max = 10000,
+                       value = 1300)
+          )
       
       # Show a plot of the generated distribution
-      mainPanel(
-        leafletOutput("distPlot")
+      #mainPanel(
+        #leafletOutput("distPlot")
         #tabsetPanel(
           #tabPanel("Order Locations", leafletOutput("map",width="80%",height="400px")),
           #tabPanel("Markers", verbatimTextOutput("markers"))
         #)
-      )
-   )
+    )
 )
 
 # Define server logic required to draw a histogram
@@ -60,15 +72,26 @@ server <- function(input, output) {
   library(shiny)
   library(leaflet)
   
-  #Get reactive ppp object for plotting
-  test <- reactive({
+  #upload file reuse
+  getFile <- reactive({
     req(input$file1)
     
     if (is.null(input$file1))
       return(NULL)
     
     firms <- read.csv(input$file1$datapath, stringsAsFactors = FALSE)
-    firms <- subset(firms,type>="Legal")
+    return(firms)
+  })
+  
+  getInputSector <- reactive({
+      sector <- input$sector
+      return(sector)
+  })
+  
+  #Get reactive ppp object for plotting
+  test <- reactive({
+    firms <- getFile()
+    firms <- subset(firms,type>=getInputSector())
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -101,16 +124,8 @@ server <- function(input, output) {
     leaflet() %>%
       addTiles()%>%
       addRasterImage(r, colors = "Spectral", opacity = 0.4)
-    #x    <- faithful[, 2] 
-    #distance <- seq(min(x), max(x), length.out = input$distance)
-    #
-  
-    #temp_sgdf <- as.SpatialGridDataFrame.im(kde_sp_100)
-    #proj4string(temp_sgdf) <- CRS("+proj=tmerc +lat_0=1.366666666666667 +lon_0=103.8333333333333 +k=1 +x_0=28001.642 +y_0=38744.572
-                                  #+datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")
-    #qtm(temp_sgdf)
+    
   })
-  
 }
 
 # Run the application 
