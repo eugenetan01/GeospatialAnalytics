@@ -11,6 +11,7 @@ library(sf)
 library(lctools)
 library(amap)
 library(REAT)
+library(dplyr)
 firms <- read.csv("geocodedCombined.csv", stringsAsFactors = FALSE)
 ```
 
@@ -23,12 +24,29 @@ firms_bank <- firms[grep("Bank", firms$type), ]
 firms_accountancy <- firms[grep("Accountancy", firms$type), ]
 ```
 
+Delete entries with duplicate postal codes
+```{r}
+firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+```
+
+------------------------------
+
 #FOR LEGAL
 Get legal companies in CBD
 1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
 (CBD areas are postal codes that start with 01,02,03,04,05,06)
 ```{r}
-legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_legal$postal_code), ]
+legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
+```
+
+Get legal companies in Jurong Lake District
+```{r}
+legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
 ```
 
 Calculate no. of legal companies in CBD
@@ -36,14 +54,29 @@ Calculate no. of legal companies in CBD
 legal_cbd_count <- nrow(legal_cbd)
 ```
 
+Calculate no. of legal companies in Jurong Lake District
+```{r}
+legal_jur_count <- nrow(legal_jur)
+```
+
 Get all companies in CBD
 ```{r}
-all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
+```
+
+Get all companies in Jurong Lake District
+```{r}
+all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms$postal_code), ]
 ```
 
 Calculate no. of companies in CBD
 ```{r}
 all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of companies in Jurong Lake District
+```{r}
+all_jur_count <- nrow(all_jur)
 ```
 
 Calculate no. of legal companies in country
@@ -56,21 +89,34 @@ Calculate no. of companies in country
 all_country_count <- nrow(firms)
 ```
 
-Compute location quotient of legal firms
+Compute location quotient of legal firms in CBD
 ```{r}
 locq(legal_cbd_count, all_cbd_count, legal_country_count, all_country_count)
 ```
+
+Compute location quotient of legal firms in Jurong Lake District
+```{r}
+locq(legal_jur_count, all_jur_count, legal_country_count, all_country_count)
+```
+
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
 
 If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+------------------------------
 
 #FOR CONSULTANCY
 Get consultancy companies in CBD
 1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
 (CBD areas are postal codes that start with 01,02,03,04,05,06)
 ```{r}
-consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_consultancy$postal_code), ]
+consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_consultancy$postal_code), ]
+```
+
+Get consultancy companies in Jurong Lake District
+```{r}
+consultancy_jur <- firms_consultancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_consultancy$postal_code), ]
 ```
 
 Calculate no. of consultancy companies in CBD
@@ -78,14 +124,29 @@ Calculate no. of consultancy companies in CBD
 consultancy_cbd_count <- nrow(consultancy_cbd)
 ```
 
+Calculate no. of consultancy companies in Jurong Lake District
+```{r}
+consultancy_jur_count <- nrow(consultancy_jur)
+```
+
 Get all companies in CBD
 ```{r}
-all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
+```
+
+Get all companies in Jurong Lake District
+```{r}
+all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms$postal_code), ]
 ```
 
 Calculate no. of companies in CBD
 ```{r}
 all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of companies in Jurong Lake District
+```{r}
+all_jur_count <- nrow(all_jur)
 ```
 
 Calculate no. of consultancy companies in country
@@ -98,36 +159,64 @@ Calculate no. of companies in country
 all_country_count <- nrow(firms)
 ```
 
-Compute location quotient of consultancy firms
+Compute location quotient of consultancy firms in CBD
 ```{r}
 locq(consultancy_cbd_count, all_cbd_count, consultancy_country_count, all_country_count)
 ```
+
+Compute location quotient of consultancy firms in Jurong Lake District
+```{r}
+locq(consultancy_jur_count, all_jur_count, consultancy_country_count, all_country_count)
+```
+
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
 
 If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+------------------------------
 
 #FOR ARCHITECTURAL
 Get architectural companies in CBD
 1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
 (CBD areas are postal codes that start with 01,02,03,04,05,06)
 ```{r}
-architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_architectural$postal_code), ]
+architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_architectural$postal_code), ]
 ```
 
-Calculate no. of legal companies in CBD
+Get architectural companies in Jurong Lake District
+```{r}
+architectural_jur <- firms_architectural[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_architectural$postal_code), ]
+```
+
+Calculate no. of architectural companies in CBD
 ```{r}
 architectural_cbd_count <- nrow(architectural_cbd)
 ```
 
+Calculate no. of architectural companies in Jurong Lake District
+```{r}
+architectural_jur_count <- nrow(architectural_jur)
+```
+
 Get all companies in CBD
 ```{r}
-all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
+```
+
+Get all companies in Jurong Lake District
+```{r}
+all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms$postal_code), ]
 ```
 
 Calculate no. of companies in CBD
 ```{r}
 all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of companies in Jurong Lake District
+```{r}
+all_jur_count <- nrow(all_jur)
 ```
 
 Calculate no. of architectural companies in country
@@ -140,22 +229,34 @@ Calculate no. of companies in country
 all_country_count <- nrow(firms)
 ```
 
-Compute location quotient of architectural firms
+Compute location quotient of architectural firms in CBD
 ```{r}
 locq(architectural_cbd_count, all_cbd_count, architectural_country_count, all_country_count)
 ```
+
+Compute location quotient of architectural firms in Jurong Lake District
+```{r}
+locq(architectural_jur_count, all_jur_count, architectural_country_count, all_country_count)
+```
+
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
 
-
 If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+------------------------------
 
 #FOR BANK
 Get bank firms in CBD
 1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
 (CBD areas are postal codes that start with 01,02,03,04,05,06)
 ```{r}
-bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_bank$postal_code), ]
+bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
+```
+
+Get bank firms in Jurong Lake District
+```{r}
+bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
 ```
 
 Calculate no. of bank firms in CBD
@@ -163,14 +264,29 @@ Calculate no. of bank firms in CBD
 bank_cbd_count <- nrow(bank_cbd)
 ```
 
+Calculate no. of bank firms in Jurong Lake District
+```{r}
+bank_jur_count <- nrow(bank_jur)
+```
+
 Get all companies in CBD
 ```{r}
-all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
+```
+
+Get all companies in Jurong Lake District
+```{r}
+all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms$postal_code), ]
 ```
 
 Calculate no. of companies in CBD
 ```{r}
 all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of companies in Jurong Lake District
+```{r}
+all_jur_count <- nrow(all_jur)
 ```
 
 Calculate no. of bank firms in country
@@ -183,21 +299,34 @@ Calculate no. of companies in country
 all_country_count <- nrow(firms)
 ```
 
-Compute location quotient of bank firms
+Compute location quotient of bank firms in CBD
 ```{r}
 locq(bank_cbd_count, all_cbd_count, bank_country_count, all_country_count)
 ```
+
+Compute location quotient of architectural firms in Jurong Lake District
+```{r}
+locq(bank_jur_count, all_jur_count, bank_country_count, all_country_count)
+```
+
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
 
 If LQ > 1 the output is more than sufficient to meet the local demand and exporting the surplus is an option. It is basic.
+
+------------------------------
 
 #FOR ACCOUNTANCY
 Get accountancy firms in CBD
 1. Find Singapore 01, 02, 03, 04, 05, and 06 in postal_code column
 (CBD areas are postal codes that start with 01,02,03,04,05,06)
 ```{r}
-accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms_accountancy$postal_code), ]
+accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
+```
+
+Get accountancy firms in Jurong Lake District
+```{r}
+accountancy_jur <- firms_accountancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_accountancy$postal_code), ]
 ```
 
 Calculate no. of accountancy firms in CBD
@@ -205,14 +334,29 @@ Calculate no. of accountancy firms in CBD
 accountancy_cbd_count <- nrow(accountancy_cbd)
 ```
 
+Calculate no. of architectural companies in Jurong Lake District
+```{r}
+accountancy_jur_count <- nrow(accountancy_jur)
+```
+
 Get all companies in CBD
 ```{r}
-all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06", firms$postal_code), ]
+all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
+```
+
+Get all companies in Jurong Lake District
+```{r}
+all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002|Singapore 6002", firms$postal_code), ]
 ```
 
 Calculate no. of companies in CBD
 ```{r}
 all_cbd_count <- nrow(all_cbd)
+```
+
+Calculate no. of companies in Jurong Lake District
+```{r}
+all_jur_count <- nrow(all_jur)
 ```
 
 Calculate no. of accountancy firms in country
@@ -225,10 +369,16 @@ Calculate no. of companies in country
 all_country_count <- nrow(firms)
 ```
 
-Compute location quotient of accountancy firms
+Compute location quotient of accountancy firms in CBD
 ```{r}
 locq(accountancy_cbd_count, all_cbd_count, accountancy_country_count, all_country_count)
 ```
+
+Compute location quotient of architectural firms in Jurong Lake District
+```{r}
+locq(accountancy_jur_count, all_jur_count, accountancy_country_count, all_country_count)
+```
+
 LQ Analysis:
 If LQ < 1, The output is not sufficient to meet the local demand and imports are needed. It is also non-basic.
 
