@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+packages = c('ggmap', 'ggplot2', 'tmap', 'sf', 'rgdal', 'maptools', 'spatstat')
+for(p in packages){
+  if(!require(p, character.only = T)){
+    install.packages(p)
+  }
+  library(p,character.only = T)
+}
+```
+
+```{r}
+library(ggmap)
+library(ggplot2)
+library(tmap)
+library(sf)
+firms <- read.csv("data/geocodedCombined.csv", stringsAsFactors = FALSE)
+firms <- subset(firms,type>="Legal")
+```
+
+```{r}
+firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
+firms_shp<-st_transform(firms_shp, 3414)
+firms_sp1 = as(firms_shp, 'Spatial')
+firms_sp2 = as(firms_sp1, 'SpatialPoints')
+#firms_sp2 <- coordinates(spTransform(firms_sp2, CRS("+proj=longlat +datum=WGS84")))
+#firms_sp3 <- spTransform(firms_sp2, CRS("+init=epsg:3414"))
+
+#crs<-+"init=epsg:3414 +proj=tmerc +lat_0=1.366666666666667 +lon_0=103.8333333333333 +k=1 +x_0=28001.642
+#+y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
+```
+
+
+```{r}
+subzones <- readOGR(dsn="shp/master-plan-2014-subzone-boundary-no-sea", layer="MP14_SUBZONE_NO_SEA_PL")
+#subzones <- spTransform(subzones, CRS(crs))
+```
+```{r}
+subzone_cr <- subzones[subzones$REGION_C == "CR",]
+#subzone_cr <- spTransform(subzone_cr, CRS("+init=epsg:3414"))
+#crs_1 <- st_crs(firms_shp)
+#subzone_cr <- spTransform(subzone_cr, CRS(paste(crs_1[2])))
+
+#subzone_cr <- spTransform(subzone_cr, crs(firms_sp3))
+cr_sp = as(subzone_cr, 'SpatialPolygons')
+#cr_sp <- spTransform(cr_sp, crs(firms_sp3))
+plot(cr_sp)
+```
+```{r}
+cr_owin <- as.owin.SpatialPolygons(cr_sp)
+plot(cr_owin)
+```
+
+```{r}
+#point.ppp <- with(firms, ppp(x = lon, y = lat, xrange = range(lon), yrange = 
+#range(lat), window=cr_owin)) 
+#spTransform(point.ppp, crs = CRS("+init=epsg:3414"))
+point.ppp <- ppp(coordinates(firms_sp2)[,1], coordinates(firms_sp2)[,2], window = cr_owin)
+plot(point.ppp)
+```
+
+```{r}
+K <- Kest(point.ppp)
+plot(K)
+```
+
+```{r}
+library(raster)
+kde_sp_100 <- density(point.ppp,0.010)
+#kde_sp_100 <- contour(kde_sp_100)
+#plot(kde_sp_100)
+r<-raster(kde_sp_100)
+
+x <- rasterToContour(r)
+#c.linesSP <- ContourLines2SLDF(x)
+
+#plot(x)
+leaflet() %>%
+      addTiles()%>%
+      addPolylines(data=x)
+```
+
