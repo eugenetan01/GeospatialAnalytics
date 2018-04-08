@@ -522,11 +522,11 @@ server <- function(session, input, output) {
     firms_accountancy <- firms[grep("Accountancy", firms$type), ]
     firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
     accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
-    accountacy_cbd_count <- nrow(accountancy_cbd)
+    accountancy_cbd_count <- nrow(accountancy_cbd)
     accountancy_country_count <- nrow(firms_accountancy)
     all_cbd_count <- getAllCompaniesCBD()
     all_country_count <- getAllCompanies()
-    return(locq(accountacy_cbd_count, all_cbd_count, accountancy_country_count, all_country_count))
+    return(locq(accountancy_cbd_count, all_cbd_count, accountancy_country_count, all_country_count))
   })
   
   getAccountancyLQJur <- reactive({
