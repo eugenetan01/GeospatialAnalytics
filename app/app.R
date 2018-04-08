@@ -121,10 +121,10 @@ ui <- fluidPage(
                                                  )
                              )
                ),fluidRow(
-                 column(width = 6, class="well",
+                 column(width = 12, class="well",
                         plotOutput("LQPlot")
                  ),
-                 column(width = 6, class="well",
+                 column(width = 12, class="well",
                         plotOutput("LQPlotJurong")
                  ),
                  column(width = 12, class="well",
@@ -417,20 +417,24 @@ server <- function(session, input, output) {
   })
 
   getAllCompaniesCBD <- reactive({
+    firms <- getFile()
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     all_cbd <- firms[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms$postal_code), ]
-    #firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     all_cbd_count <- nrow(all_cbd)
     return((all_cbd_count))
   })
   
   getAllCompaniesJurong <- reactive({
+    firms <- getFile()
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     all_jur <- firms[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms$postal_code), ]
-    #firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     all_jur_count <- nrow(all_jur)
     return(all_jur_count)
   })
   
   getAllCompanies <- reactive({
+    firms <- getFile()
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     all_country_count <- nrow(firms)
     return((all_country_count))
   })
@@ -441,11 +445,8 @@ server <- function(session, input, output) {
     firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
     firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
-    legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
     legal_cbd_count <- nrow(legal_cbd)
-    legal_jur_count <- nrow(legal_jur)
     all_cbd_count <- getAllCompaniesCBD()
-    all_jur_count <- getAllCompaniesJurong()
     legal_country_count <- nrow(firms_legal)
     all_country_count <- getAllCompanies()
     var <- locq(legal_cbd_count, all_cbd_count, legal_country_count, all_country_count)
@@ -457,11 +458,8 @@ server <- function(session, input, output) {
     firms_legal <- firms[grep("Legal", firms$type), ]
     firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
     firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
-    legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
     legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
-    legal_cbd_count <- nrow(legal_cbd)
     legal_jur_count <- nrow(legal_jur)
-    all_cbd_count <- getAllCompaniesCBD()
     all_jur_count <- getAllCompaniesJurong()
     legal_country_count <- nrow(firms_legal)
     all_country_count <- getAllCompanies()
@@ -473,6 +471,7 @@ server <- function(session, input, output) {
     firms <- getFile()
     firms_bank <- firms[grep("Bank", firms$type), ]
     firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
     bank_cbd_count <- nrow(bank_cbd)
     bank_country_count <- nrow(firms_bank)
@@ -485,6 +484,7 @@ server <- function(session, input, output) {
     firms <- getFile()
     firms_bank <- firms[grep("Bank", firms$type), ]
     firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
     bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
     bank_jur_count <- nrow(bank_jur)
     all_jur_count <- getAllCompaniesJurong()
