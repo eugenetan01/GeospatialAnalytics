@@ -37,7 +37,7 @@ ui <- fluidPage(
                             choices=c("Legal" = "Legal",
                                       "Banking" = "Bank",
                                       "Consultancy" = "Consultancy",
-                                      "Accounting" = "Accountacy",
+                                      "Accounting" = "Accountancy",
                                       "Architectural" = "Architectural"),
                             selected = "Legal"),
                 sliderInput("distance",
