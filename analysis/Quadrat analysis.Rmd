@@ -64,8 +64,8 @@ plot(cbd_points,col="blue", pch=20, add=T)
 ```
 # using csv to run this 
 ```{r}
-firms_points <- remove.duplicates(industries_sp2)
-firms_points <- firms_points[mpsz_svy21,]
+firms_points <- industries_sp1[mpsz_svy21,]
+firms_points <- remove.duplicates(industries_sp1)
 plot(firms_points)
 plot(mpsz_svy21)
 plot(firms_points,col="blue", pch=20, add=T)
@@ -74,7 +74,6 @@ plot(cbd)
 cbd_points <- firms_points[cbd,]
 plot(cbd)
 plot(cbd_points,col="blue", pch=20, add=T)
-
 ```
 
 # legal
@@ -140,6 +139,9 @@ plot(cbd_points,col="blue", pch=20, add=T)
 
 # to run quadrat analysis on the number of events
 ```{r}
+cbd_points$type <- factor(cbd_points$type)
+levels(cbd_points$type)
+mycolors = c('red','blue','green','orange','violet')
 window <- as.owin(cbd)
 firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
 qc <- quadratcount(firms_ppp) 
@@ -149,7 +151,7 @@ qc <- quadratcount(firms_ppp)
   # plot(cbd_arch,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_cons,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_acct,pch=16,cex=0.5, col="green", add=T)
-plot(cbd_points,pch=1,cex=0.5, main="Professional Services in the CBD")
+plot(cbd_points,pch=1,cex=0.5, col = mycolors, main="Professional Services in the CBD")
 plot(qc,add=T,col="red")
 plot(window)
 
