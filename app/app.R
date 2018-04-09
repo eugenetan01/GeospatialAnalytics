@@ -19,7 +19,7 @@ ui <- fluidPage(
            tags$head(
              includeCSS("styles.css")
            ),
-           leafletOutput("distPlot"),
+           leafletOutput("distPlot", width="100%",height="1000px"),
            absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                        draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
                        width = 330, height = "auto",
@@ -122,39 +122,39 @@ ui <- fluidPage(
                              )
                ),fluidRow(
                  column(width = 12, class="well",
-                        plotOutput("LQPlot")
-                 ),
-                 column(width = 12, class="well",
-                        plotOutput("LQPlotJurong")
-                 ),
-                 column(width = 12, class="well",
                         uiOutput("analysis")
                  ),
                  conditionalPanel(condition="input.lq_industry.indexOf('Legal') > -1",
                                   column(width = 12, class = "well",
-                                         h4("Legal Firms Location Quotient"),
+                                         h4("Legal Firms Location Quotient Analysis"),
                                          uiOutput("lqLegal")
                                   )),
                  conditionalPanel(condition="input.lq_industry.indexOf('Bank') > -1",
                                   column(width = 12, class = "well",
-                                         h4("Banking Firms Location Quotient"),
+                                         h4("Banking Firms Location Quotient Analysis"),
                                          uiOutput("lqBank")
                                   )),
                  conditionalPanel(condition="input.lq_industry.indexOf('Consultancy') > -1",
                                   column(width = 12, class = "well",
-                                         h4("Consultancy Firms Location Quotient"),
+                                         h4("Consultancy Firms Location Quotient Analysis"),
                                          uiOutput("lqConsultancy")
                                   )),
                  conditionalPanel(condition="input.lq_industry.indexOf('Accountancy') > -1",
                                   column(width = 12, class = "well",
-                                         h4("Accountancy Firms Location Quotient"),
+                                         h4("Accountancy Firms Location Quotient Analysis"),
                                          uiOutput("lqAccountancy")
                                   )),
                  conditionalPanel(condition="input.lq_industry.indexOf('Architectural') > -1",
                                   column(width = 12, class = "well",
-                                         h4("Architectural Firms Location Quotient"),
+                                         h4("Architectural Firms Location Quotient Analysis"),
                                          uiOutput("lqArchitectural")
-                                  ))
+                                  )),
+                 column(width = 12, class="well",
+                        plotOutput("LQPlot")
+                 ),
+                 column(width = 12, class="well",
+                        plotOutput("LQPlotJurong")
+                 )
                )
       )         
     )   
@@ -264,10 +264,17 @@ server <- function(session, input, output) {
     
     pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(r),
                         na.color = "transparent")
-    
+    # 
+    # kde_adj <- setValues(r, getValues(r))
+    # 
+    # summarykdeppp.values <- quantile(na.omit(getValues(kde_adj)), seq(0,1,0.2))
+    # at <- c(summarykdeppp.values[1], summarykdeppp.values[2], summarykdeppp.values[3], summarykdeppp.values[4], summarykdeppp.values[5], summarykdeppp.values[6])
+    # cb <- colorBin(palette = "YlOrRd", bins = at, domain = at, na.color = "#00000000", reverse=FALSE)
+    # 
     leaflet() %>%
       addTiles()%>%
-      addRasterImage(r, colors = "Spectral", opacity = 0.4)
+      addRasterImage(r, colors = "Spectral", opacity = 0.4)#%>%
+      #addLegend(pal = cb, values = at, title = "Density Function", position='bottomleft', labFormat = labelFormat(digits=8),layerId="leg")
   })
   
   #Plot KDE for comparison panel
@@ -467,6 +474,100 @@ server <- function(session, input, output) {
     return(var1)
   })
   
+  getLegalCount <- reactive({
+    firms <- getFile()
+    firms_legal <- firms[grep("Legal", firms$type), ]
+    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
+    legal_cbd_count <- nrow(legal_cbd)
+    return(legal_cbd_count)
+  })
+  
+  getLegalCountJur <- reactive({
+    firms <- getFile()
+    firms_legal <- firms[grep("Legal", firms$type), ]
+    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
+    legal_jur_count <- nrow(legal_jur)
+    return(legal_jur_count)
+  })
+  
+  getBanksCount <- reactive({
+    firms <- getFile()
+    firms_bank <- firms[grep("Bank", firms$type), ]
+    #firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
+    bank_cbd_count <- nrow(bank_cbd)
+    return(bank_cbd_count)
+  })
+  
+  getBanksCountJur <- reactive({
+    firms <- getFile()
+    firms_bank <- firms[grep("Bank", firms$type), ]
+    #firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
+    bank_jur_count <- nrow(bank_jur)
+    return(bank_jur_count)
+  })
+  
+  getConsultancyCount <- reactive({
+    firms <- getFile()
+    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+    consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_consultancy$postal_code), ]
+    consultancy_cbd_count <- nrow(consultancy_cbd)
+    return(consultancy_cbd_count)
+  })  
+  
+  getConsultancyCountJur <- reactive({
+    firms <- getFile()
+    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+    consultancy_jur <- firms_consultancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_consultancy$postal_code), ]
+    consultancy_jur_count <- nrow(consultancy_jur)
+    return(consultancy_jur_count)
+  })  
+  
+  getAccountancyCount <- reactive({
+    firms <- getFile()
+    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+    accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
+    accountancy_cbd_count <- nrow(accountancy_cbd)
+    return(accountancy_cbd_count)
+  })  
+  
+  getAccountancyCountJur <- reactive({
+    firms <- getFile()
+    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+    accountancy_jur <- firms_accountancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_accountancy$postal_code), ]
+    accountancy_jur_count <- nrow(accountancy_jur)
+    return(accountancy_jur_count)
+  })  
+  
+  getArchitecturalCount <- reactive({
+    firms <- getFile()
+    firms_architectural <- firms[grep("Architectural", firms$type), ]
+    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+    architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_architectural$postal_code), ]
+    architectural_cbd_count <- nrow(architectural_cbd)
+    return(architectural_cbd_count)
+  })  
+  
+  getArchitecturalCountJur <- reactive({
+    firms <- getFile()
+    firms_architectural <- firms[grep("Architectural", firms$type), ]
+    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+    architectural_jur <- firms_architectural[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_architectural$postal_code), ]
+    architectural_jur_count <- nrow(architectural_jur)
+    return(architectural_jur_count)
+  })
+  
   getBankLQCBD <- reactive({
     firms <- getFile()
     firms_bank <- firms[grep("Bank", firms$type), ]
@@ -588,31 +689,51 @@ server <- function(session, input, output) {
   output$lqLegal <- renderUI({
     str3 <- paste("<b>Location Quotient in CBD:</b> ", getLegalLQCBD(), " ")
     str4 <- paste("<b>Location Quotient in Jurong:</b> ", getLegalLQJur(), " ")
-    HTML(paste(str3, str4, sep = "<br/>"))
+    strl1 <- paste("<b>Number of Legal firms in CBD:</b> ", getLegalCount(), " ")
+    strAll <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
+    strl2 <- paste("<b>Number of Legal firms in Jurong:</b> ", getLegalCountJur(), " ")
+    strJur <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    HTML(paste(str3, str4, strl1, strAll, strl2, strJur, sep = "<br/>"))
   })
   
   output$lqBank <- renderUI({
     strB1 <- paste("<b>Location Quotient in CBD:</b> ", getBankLQCBD(), " ")
     strB2 <- paste("<b>Location Quotient in Jurong:</b> ", getBankLQJur(), " ")
-    HTML(paste(strB1, strB2, sep = "<br/>"))
+    strbnum1 <- paste("<b>Number of Banks in CBD:</b> ", getBanksCount(), " ")
+    strAllBank <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
+    strbnum2 <- paste("<b>Number of Birms in Jurong:</b> ", getBanksCountJur(), " ")
+    strJurBank <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    HTML(paste(strB1, strB2, strbnum1, strAllBank, strbnum2, strJurBank, sep = "<br/>"))
   })
   
   output$lqConsultancy <- renderUI({
     strC1 <- paste("<b>Location Quotient in CBD:</b> ", getConsultancyLQCBD(), " ")
     strC2 <- paste("<b>Location Quotient in Jurong:</b> ", getConsultancyLQJur(), " ")
-    HTML(paste(strC1, strC2, sep = "<br/>"))
+    strcnum1 <- paste("<b>Number of Consultancy Firms in CBD:</b> ", getConsultancyCount(), " ")
+    strAllC <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
+    strcnum2 <- paste("<b>Number of Consultancy Firms in Jurong:</b> ", getConsultancyCountJur(), " ")
+    strJurC <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    HTML(paste(strC1, strC2, strcnum1, strAllC, strcnum2, strJurC, sep = "<br/>"))
   })
   
   output$lqAccountancy <- renderUI({
     strA1 <- paste("<b>Location Quotient in CBD:</b> ", getAccountancyLQCBD(), " ")
     strA2 <- paste("<b>Location Quotient in Jurong:</b> ", getAccountancyLQJur(), " ")
-    HTML(paste(strA1, strA2, sep = "<br/>"))
+    stranum1 <- paste("<b>Number of Accounting Firms in CBD:</b> ", getAccountancyCount(), " ")
+    strAllA <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
+    stranum2 <- paste("<b>Number Accounting Firms in Jurong:</b> ", getAccountancyCountJur(), " ")
+    strJurA <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    HTML(paste(strA1, strA2, stranum1, strAllA, stranum2, strJurA, sep = "<br/>"))
   })
   
   output$lqArchitectural <- renderUI({
     strAr1 <- paste("<b>Location Quotient in CBD:</b> ", getArchitecturalLQCBD(), " ")
     strAr2 <- paste("<b>Location Quotient in Jurong:</b> ", getArchitecturalLQJur(), " ")
-    HTML(paste(strAr1, strAr2, sep = "<br/>"))
+    strarcnum1 <- paste("<b>Number of Architectural Firms in CBD:</b> ", getArchitecturalCount(), " ")
+    strAllArc <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
+    strarcnum2 <- paste("<b>Number of Architectural Firms in Jurong:</b> ", getArchitecturalCountJur(), " ")
+    strJurArc <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    HTML(paste(strAr1, strAr2,strarcnum1, strAllArc, strarcnum2, strJurArc, sep = "<br/>"))
   })
   
   output$analysis <- renderUI({
