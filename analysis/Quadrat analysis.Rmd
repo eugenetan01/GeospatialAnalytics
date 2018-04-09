@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-packages = c('rgdal', 'maptools', 'spatstat') 
+packages = c('rgdal', 'maptools', 'spatstat', 'sf') 
 for (p in packages){ 
 if(!require(p, character.only = T)){ 
 install.packages(p) 
@@ -19,27 +19,35 @@ library(p,character.only = T)
 
 ```{r}
 mpsz <- readOGR(dsn = "shp", layer = "MP14_SUBZONE_NO_SEA_PL")
+# firms <- readOGR(dsn = "shp", layer = "geocodedCombined")
+```
+
+```{r}
 industries <- read.csv("data/geocodedCombined.csv", stringsAsFactors = FALSE)
-firms <- readOGR(dsn = "shp", layer = "geocodedCombined")
 ```
 
 ```{r}
-firms_sf <- st_as_sf(industries, coords = c("lon","lat"), crs = 3414)
-class(firms_sf)
+crs.New <- "+proj=tmerc +lat_0=1.366666666666667 +lon_0=103.8333333333333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
+industries_shp <- st_as_sf(industries, coords = c("lon","lat"), crs = 4326)
+industries_shp <-st_transform(industries_shp, crs = 3414)
+industries_sp1 = as(industries_shp, 'Spatial')
+industries_sp2 = as(industries_sp1, 'SpatialPoints')
+proj4string(industries_sp2) <- crs.New
+proj4string(mpsz_svy21) <- crs.New
 
 ```
 
 ```{r}
-mpsz_svy21 <- spTransform(mpsz, CRS("+init=epsg:3414"))
-firms_svy21 <- spTransform(firms, CRS("+init=epsg:3414"))
-```
-```{r}
-summary(firms_svy21$type)
-legal <- firms_svy21[firms_svy21$type=='Legal', ]
-acct <- firms_svy21[firms_svy21$type=='Accountancy', ]
-arch <- firms_svy21[firms_svy21$type=='Architectural', ]
-bank <- firms_svy21[firms_svy21$type=='Bank', ]
-consult <- firms_svy21[firms_svy21$type=='Consultancy', ]
+# mpsz_svy21 <- spTransform(mpsz, CRS("+init=epsg:3414"))
+# firms_svy21 <- spTransform(firms, CRS("+init=epsg:3414"))
+# ```
+# ```{r}
+# summary(firms_svy21$type)
+# legal <- firms_svy21[firms_svy21$type=='Legal', ]
+# acct <- firms_svy21[firms_svy21$type=='Accountancy', ]
+# arch <- firms_svy21[firms_svy21$type=='Architectural', ]
+# bank <- firms_svy21[firms_svy21$type=='Bank', ]
+# consult <- firms_svy21[firms_svy21$type=='Consultancy', ]
 ```
 
 # cbd just run this for cbd
@@ -54,6 +62,21 @@ cbd_points <- firms_points[cbd,]
 plot(cbd)
 plot(cbd_points,col="blue", pch=20, add=T)
 ```
+# using csv to run this 
+```{r}
+firms_points <- remove.duplicates(industries_sp2)
+firms_points <- firms_points[mpsz_svy21,]
+plot(firms_points)
+plot(mpsz_svy21)
+plot(firms_points,col="blue", pch=20, add=T)
+cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+plot(cbd)
+cbd_points <- firms_points[cbd,]
+plot(cbd)
+plot(cbd_points,col="blue", pch=20, add=T)
+
+```
+
 # legal
 ```{r}
   legal_points <- legal[mpsz_svy21,]
@@ -126,7 +149,7 @@ qc <- quadratcount(firms_ppp)
   # plot(cbd_arch,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_cons,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_acct,pch=16,cex=0.5, col="green", add=T)
-plot(cbd_points,pch=1,cex=0.5, col=cbd_points$type , main="Professional Services in the CBD")
+plot(cbd_points,pch=1,cex=0.5, main="Professional Services in the CBD")
 plot(qc,add=T,col="red")
 plot(window)
 
