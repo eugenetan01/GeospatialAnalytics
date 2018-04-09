@@ -1,0 +1,135 @@
+---
+title: "Quadrat analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+packages = c('rgdal', 'maptools', 'spatstat') 
+for (p in packages){ 
+if(!require(p, character.only = T)){ 
+install.packages(p) 
+} 
+library(p,character.only = T) 
+} 
+```
+
+```{r}
+mpsz <- readOGR(dsn = "shp", layer = "MP14_SUBZONE_NO_SEA_PL")
+industries <- read.csv("data/geocodedCombined.csv", stringsAsFactors = FALSE)
+firms <- readOGR(dsn = "shp", layer = "geocodedCombined")
+```
+
+```{r}
+firms_sf <- st_as_sf(industries, coords = c("lon","lat"), crs = 3414)
+class(firms_sf)
+
+```
+
+```{r}
+mpsz_svy21 <- spTransform(mpsz, CRS("+init=epsg:3414"))
+firms_svy21 <- spTransform(firms, CRS("+init=epsg:3414"))
+```
+```{r}
+summary(firms_svy21$type)
+legal <- firms_svy21[firms_svy21$type=='Legal', ]
+acct <- firms_svy21[firms_svy21$type=='Accountancy', ]
+arch <- firms_svy21[firms_svy21$type=='Architectural', ]
+bank <- firms_svy21[firms_svy21$type=='Bank', ]
+consult <- firms_svy21[firms_svy21$type=='Consultancy', ]
+```
+
+# cbd just run this for cbd
+```{r}
+firms_points <- firms_svy21[mpsz_svy21,]
+firms_points <- remove.duplicates(firms_svy21)
+plot(mpsz_svy21)
+plot(firms_points,col="blue", pch=20, add=T)
+cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+plot(cbd)
+cbd_points <- firms_points[cbd,]
+plot(cbd)
+plot(cbd_points,col="blue", pch=20, add=T)
+```
+# legal
+```{r}
+  legal_points <- legal[mpsz_svy21,]
+  legal_points <- remove.duplicates(legal)
+  plot(mpsz_svy21)
+  plot(legal_points,col="blue", pch=20, add=T)
+  cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+  plot(cbd)
+  cbd_legal <- legal_points[cbd,]
+  plot(cbd)
+  plot(cbd_legal,col="blue", pch=20, add=T)
+```
+#acct
+```{r}
+  acct_points <- acct[mpsz_svy21,]
+  acct_points <- remove.duplicates(acct)
+  plot(mpsz_svy21)
+  plot(acct_points,col="blue", pch=20, add=T)
+  cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+  plot(cbd)
+  cbd_acct <- acct_points[cbd,]
+  plot(cbd)
+  plot(cbd_acct,col="blue", pch=20, add=T)
+```
+#arch
+```{r}
+  arch_points <- arch[mpsz_svy21,]
+  arch_points <- remove.duplicates(arch)
+  plot(mpsz_svy21)
+  plot(arch_points,col="blue", pch=20, add=T)
+  cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+  plot(cbd)
+  cbd_arch <- arch_points[cbd,]
+  plot(cbd)
+  plot(cbd_arch,col="blue", pch=20, add=T)
+```
+#consult
+```{r}
+  cons_points <- consult[mpsz_svy21,]
+  cons_points <- remove.duplicates(consult)
+  plot(mpsz_svy21)
+  plot(cons_points,col="blue", pch=20, add=T)
+  cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+  plot(cbd)
+ cbd_cons <- cons_points[cbd,]
+ plot(cbd)
+ plot(cbd_cons,col="blue", pch=20, add=T)
+```
+#bank 
+```{r}
+ bank_points <- bank[mpsz_svy21,]
+ bank_points <- remove.duplicates(bank)
+ plot(mpsz_svy21)
+ plot(bank_points,col="blue", pch=20, add=T)
+ cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+ plot(cbd)
+ cbd_bank <- bank_points[cbd,]
+ plot(cbd)
+ plot(cbd_bank,col="blue", pch=20, add=T)
+```
+
+# to run quadrat analysis on the number of events
+```{r}
+window <- as.owin(cbd)
+firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
+qc <- quadratcount(firms_ppp) 
+# qc_10by5 <- quadratcount(firms_ppp, nx = 6, ny = 6) 
+  # plot(cbd_bank,pch=16,cex=0.5, col="blue", main="Professional Services in the CBD")
+  # plot(cbd_legal,pch=16,cex=0.5, col="green", add=T)
+  # plot(cbd_arch,pch=16,cex=0.5, col="green", add=T)
+  # plot(cbd_cons,pch=16,cex=0.5, col="green", add=T)
+  # plot(cbd_acct,pch=16,cex=0.5, col="green", add=T)
+plot(cbd_points,pch=1,cex=0.5, col=cbd_points$type , main="Professional Services in the CBD")
+plot(qc,add=T,col="red")
+plot(window)
+
+quadrat.test(firms_ppp, method = "M", nsim = 999)
+```
+
