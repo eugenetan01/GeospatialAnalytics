@@ -19,19 +19,43 @@ ui <- fluidPage(
            tags$head(
              includeCSS("styles.css")
            ),
-           leafletOutput("distPlot", width="100%",height="1000px"),
+           conditionalPanel(condition="input.analysis.indexOf('SP') > -1",
+            conditionalPanel(condition="input.sectors_SP.indexOf('Legal') > -1",                
+              leafletOutput("SPPlot_legal", width="100%",height="1000px")
+            ),
+            conditionalPanel(condition="input.sectors_SP.indexOf('Bank') > -1", 
+              leafletOutput("SPPlot_bank", width="100%",height="1000px")
+            ),
+            conditionalPanel(condition="input.sectors_SP.indexOf('Consultancy') > -1", 
+                             leafletOutput("SPPlot_con", width="100%",height="1000px")
+            ),
+            conditionalPanel(condition="input.sectors_SP.indexOf('Accountancy') > -1", 
+                             leafletOutput("SPPlot_acct", width="100%",height="1000px")
+            ),
+            conditionalPanel(condition="input.sectors_SP.indexOf('Architectural') > -1", 
+                             leafletOutput("SPPlot_arch", width="100%",height="1000px")
+            )
+           ),
+           conditionalPanel(condition="input.analysis.indexOf('Kernel') > -1",
+                            leafletOutput("distPlot", width="100%",height="1000px")
+           ),
            absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                        draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
                        width = 330, height = "auto",
                        
                        h2("REMGIS"),
-         
                 fileInput("file1", "Choose CSV File",
                         accept = c(
                           "text/csv",
                           "text/comma-separated-values,text/plain",
                           ".csv")
                 ), 
+                selectInput(inputId="analysis",
+                            label="Analysis:",
+                            choices=c("Spatial Point Analysis" = "SP",
+                                      "Kernel Density Analysis" = "Kernel"),
+                            selected = "SP"),
+             conditionalPanel(condition="input.analysis.indexOf('Kernel') > -1",
                 selectInput(inputId="sector",
                             label="Sector:",
                             choices=c("Legal" = "Legal",
@@ -45,8 +69,19 @@ ui <- fluidPage(
                            min = 100,
                            max = 1000,
                            value = 280)
-              )
-        )
+              ),
+             conditionalPanel(condition="input.analysis.indexOf('SP') > -1",
+                              selectInput(inputId="sectors_SP",
+                                          label="Sector:",
+                                          choices=c("Legal" = "Legal",
+                                                    "Banking" = "Bank",
+                                                    "Consultancy" = "Consultancy",
+                                                    "Accounting" = "Accountancy",
+                                                    "Architectural" = "Architectural"),
+                                          selected = "Legal")
+             )
+           ) 
+        ) 
       ),
       tabPanel("Kernel Density Map Comparison",
                div(class="outer",
@@ -156,6 +191,71 @@ ui <- fluidPage(
                         plotOutput("LQPlotJurong")
                  )
                )
+      ),
+      tabPanel("Quadrat Analysis",
+               div(class="outer",
+                   tags$head(
+                     includeCSS("styles.css")
+                   )),
+               absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                             draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                             width = 330, height = "auto",
+                             h2("REMGIS"),
+                             checkboxGroupInput("quadrat_industry", "Show",
+                                                  choices = c(
+                                                    "Legal" = "Legal",
+                                                    "Banking" = "Bank",
+                                                    "Consultancy" = "Consultancy",
+                                                    "Accounting" = "Accountancy",
+                                                    "Architectural" = "Architectural"
+                                                  )
+                             ),
+                             sliderInput("row_quadrat",
+                                         "Rows:",
+                                         min = 1,
+                                         max = 10,
+                                         value = 5,
+                                         step = 1),
+                             sliderInput("col_quadrat",
+                                         "Columns:",
+                                         min = 1,
+                                         max = 10,
+                                         value = 5, 
+                                         step =1)
+                             
+               ),
+               fluidRow(
+                 conditionalPanel(condition="input.quadrat_industry.indexOf('Legal') > -1",
+                                  column(width = 6, class = "well",
+                                         h4("Legal Firms Quadrat Analysis"),
+                                         plotOutput("plotLegalQuadrat")
+                                  )), 
+                 conditionalPanel(condition="input.quadrat_industry.indexOf('Bank') > -1",
+                                  column(width = 6, class="well",
+                                         h4("Banks Firms Quadrat Analysis"),
+                                         plotOutput("plotBankQuadrat")
+                                  )),  
+                 conditionalPanel(condition="input.quadrat_industry.indexOf('Consultancy') > -1",
+                                  column(width = 6, class="well",
+                                         h4("Consultancy Firms Quadrat Analysis"),
+                                         plotOutput("plotConsultancyQuadrat")
+                                  )),    
+                 conditionalPanel(condition="input.quadrat_industry.indexOf('Accountancy') > -1",
+                                  column(width = 6, class="well",
+                                         h4("Accountancy Firms Quadrat Analysis"),
+                                         plotOutput("plotAccountancyQuadrat")
+                                  ))
+                 ,
+                 conditionalPanel(condition="input.quadrat_industry.indexOf('Architectural') > -1",
+                                  column(width = 6, class="well",
+                                         h4("Architectural Firms Quadrat Analysis"),
+                                         plotOutput("plotArchitecturalQuadrat")
+                                  ))      
+               ),
+               column(width = 12, class = "well",
+                  plotOutput("quadratAll")
+               )
+               
       )         
     )   
   )
@@ -224,8 +324,7 @@ server <- function(session, input, output) {
       return(sector)
   })
   
-  #Get reactive ppp object for plotting
-  test <- reactive({
+  getSpatialAdjusted <- reactive({
     firms <- getFile()
     firms <- subset(firms,type>=getInputSector())
     
@@ -233,6 +332,12 @@ server <- function(session, input, output) {
     firms_shp<-st_transform(firms_shp, 3414)
     firms_sp1 = as(firms_shp, 'Spatial')
     firms_sp2 = as(firms_sp1, 'SpatialPoints')
+    return(firms_sp2)
+  })
+  
+  #Get reactive ppp object for plotting
+  test <- reactive({
+    firms_sp2 <- getSpatialAdjusted()
     
     subzones <- readOGR(dsn="shp/master-plan-2014-subzone-boundary-no-sea", layer="MP14_SUBZONE_NO_SEA_PL")
     subzone_cr <- subzones[subzones$REGION_C == "CR",]
@@ -275,6 +380,72 @@ server <- function(session, input, output) {
       addTiles()%>%
       addRasterImage(r, colors = "Spectral", opacity = 0.4)#%>%
       #addLegend(pal = cb, values = at, title = "Density Function", position='bottomleft', labFormat = labelFormat(digits=8),layerId="leg")
+  })
+  
+  
+  output$SPPlot_legal <- renderLeaflet({
+    firms1 <- getFile()
+    firms_legal <- subset(firms1,type>="Legal")
+    firms_legal$vectorName <- iconv(enc2utf8(firms_legal$vectorName),sub="byte")
+    firms_legal$vectorAddress <- iconv(enc2utf8(firms_legal$vectorAddress),sub="byte")
+    firms_legal$type <- iconv(enc2utf8(firms_legal$type),sub="byte")
+    legal_coy <- st_as_sf(firms_legal, coords = c("lon", "lat"), crs = 4326)
+    l1<-st_transform(legal_coy, 3414)
+    shape_legal <- tm_shape(l1) + tm_dots(col = "red", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots
+    tmap_leaflet(shape_legal)
+  })
+  
+  output$SPPlot_bank <- renderLeaflet({
+    firms2 <- getFile()
+    firms_bank <- subset(firms2,type>="Bank")
+    firms_bank$vectorName <- iconv(enc2utf8(firms_bank$vectorName),sub="byte")
+    firms_bank$vectorAddress <- iconv(enc2utf8(firms_bank$vectorAddress),sub="byte")
+    firms_bank$type <- iconv(enc2utf8(firms_bank$type),sub="byte")
+    bank_coy <- st_as_sf(firms_bank, coords = c("lon", "lat"), crs = 4326)
+    l2<-st_transform(bank_coy, 3414)
+    shape_bank <- tm_shape(l2) + tm_dots(col = "blue", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots
+    tmap_leaflet(shape_bank)
+  })
+  
+  output$SPPlot_con <- renderLeaflet({
+    firms3 <- getFile()
+    firms_con <- subset(firms3,type>="Consultancy")
+    firms_con$vectorName <- iconv(enc2utf8(firms_con$vectorName),sub="byte")
+    firms_con$vectorAddress <- iconv(enc2utf8(firms_con$vectorAddress),sub="byte")
+    firms_con$type <- iconv(enc2utf8(firms_con$type),sub="byte")
+    con_coy <- st_as_sf(firms_con, coords = c("lon", "lat"), crs = 4326)
+    l3<-st_transform(con_coy, 3414)
+    shape_con <- tm_shape(l3) + tm_dots(col = "green", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots
+    tmap_leaflet(shape_con)
+  })
+  
+  output$SPPlot_acct <- renderLeaflet({
+    firms <- getFile()
+    firms_act <- subset(firms,type>="Accountancy")
+    firms_act$vectorName <- iconv(enc2utf8(firms_act$vectorName),sub="byte")
+    firms_act$vectorAddress <- iconv(enc2utf8(firms_act$vectorAddress),sub="byte")
+    firms_act$type <- iconv(enc2utf8(firms_act$type),sub="byte")
+    ac_coy <- st_as_sf(firms_act, coords = c("lon", "lat"), crs = 4326)
+    l4<-st_transform(ac_coy, 3414)
+    shape_a <- tm_shape(l4) + tm_dots(col = "orange", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots
+    tmap_leaflet(shape_a)
+  })
+  
+  output$SPPlot_arch <- renderLeaflet({
+    firms5 <- getFile()
+    firms_arch <- subset(firms5,type>="Architectural")
+    firms_arch$vectorName <- iconv(enc2utf8(firms_arch$vectorName),sub="byte")
+    firms_arch$vectorAddress <- iconv(enc2utf8(firms_arch$vectorAddress),sub="byte")
+    firms_arch$type <- iconv(enc2utf8(firms_arch$type),sub="byte")
+    arch_coy <- st_as_sf(firms_arch, coords = c("lon", "lat"), crs = 4326)
+    l5<-st_transform(arch_coy, 3414)
+    shape_arch <- tm_shape(l5) + tm_dots(col = "violet", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots
+    tmap_leaflet(shape_arch)
   })
   
   #Plot KDE for comparison panel
@@ -415,7 +586,7 @@ server <- function(session, input, output) {
     Architectural <- density(point.ppp, input$distance)
     
     r5<-raster(Architectural)
-    crs(r2) <- CRS("+init=epsg:3414")
+    crs(r5) <- CRS("+init=epsg:3414")
     
     leaflet() %>%
       addTiles()%>%
@@ -738,6 +909,239 @@ server <- function(session, input, output) {
   
   output$analysis <- renderUI({
     HTML(paste("<b>LQ Analysis</b>: <br/> If LQ < 1, the output is not sufficient to form a CBD and more firms of this sector are needed. It is also non-basic. <br/> If LQ > 1, the output is more than sufficient to form a CBD and exporting more firms is an option. It is basic."))
+  })
+  
+  mpsz_svy21 <- reactive({
+    crs.New <- "+proj=tmerc +lat_0=1.366666666666667 +lon_0=103.8333333333333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs"
+    mpsz <- readOGR(dsn = "shp/master-plan-2014-subzone-boundary-no-sea", layer = "MP14_SUBZONE_NO_SEA_PL")
+    mpsz_svy21 <- spTransform(mpsz, crs.New)
+    return(mpsz_svy21)
+  })
+  
+  firmsSpatialObj <- reactive({
+    industries <- getFile()
+    industries_shp <- st_as_sf(industries, coords = c("lon","lat"), crs = 4326)
+    industries_shp <-st_transform(industries_shp, crs = 3414)
+    industries_sp1 = as(industries_shp, 'Spatial')
+    return(industries_sp1)
+  })
+  
+  firmsGetCBDObj <- reactive({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    firms_points <- industries_sp1[mpsz_svy21,]
+    firms_points <- remove.duplicates(industries_sp1)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    return(cbd)
+  })
+  
+  firmsGetCBDPoints <- reactive({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    firms_points <- industries_sp1[mpsz_svy21,]
+    firms_points <- remove.duplicates(industries_sp1)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    cbd_points <- firms_points[cbd,]
+    return(cbd_points)
+  }) 
+
+  output$quadratAll <- renderPlot({
+    cbd_points <- firmsGetCBDPoints()
+    cbd_points$type <- factor(cbd_points$type)
+    levels(cbd_points$type)
+    cbd <- firmsGetCBDObj()
+    window <- as.owin(cbd)
+    mycolors = c('red','blue','green','orange','violet')
+    firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
+    qc <- quadratcount(firms_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc,col="red", main="Professional Services in the CBD")
+    plot(cbd_points,pch=1,cex=0.5, col = mycolors, add=T)
+    legend("topright", 
+           legend = c("Legal", "Banks", "Consultancy", "Accountancy", "Architectural"), 
+           col = c("red", "blue", "darkgreen", "darkorange", "darkviolet"),
+           rgb(0.8,0.4,0.1,0.7), 
+           pch = c(17,19), 
+           bty = "n", 
+           pt.cex = 2, 
+           cex = 1.2, 
+           text.col = "black", 
+           horiz = F , 
+           inset = c(0.1, 0.1))
+  })
+  
+  output$plotLegalQuadrat <- renderPlot({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    legal <- industries_sp1[industries_sp1$type=='Legal', ]
+    legal_points <- legal[mpsz_svy21,]
+    legal_points <- remove.duplicates(legal)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_legal <- legal_points[cbd,]
+    legal_ppp <- ppp(x=legal_points@coords[,1],y=legal_points@coords[,2], window = window)
+    qc_legal <- quadratcount(legal_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc_legal,col="black")
+    plot(cbd_legal,pch=16,cex=0.5, col="red", add=T)
+  })
+  
+  output$plotBankQuadrat <- renderPlot({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    bank <- industries_sp1[industries_sp1$type=='Bank', ]
+    bank_points <- bank[mpsz_svy21,]
+    bank_points <- remove.duplicates(bank)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_bank <- bank_points[cbd,]
+    bank_ppp <- ppp(x=bank_points@coords[,1],y=bank_points@coords[,2], window = window)
+    qc_bank <- quadratcount(bank_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc_bank,col="black")
+    plot(cbd_bank,pch=16,cex=0.5, col="blue", add=T)
+  })
+  
+  output$plotConsultancyQuadrat <- renderPlot({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    consultancy <- industries_sp1[industries_sp1$type=='Consultancy', ]
+    consultancy_points <- consultancy[mpsz_svy21,]
+    consultancy_points <- remove.duplicates(consultancy)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_consultancy <- consultancy_points[cbd,]
+    consultancy_ppp <- ppp(x=consultancy_points@coords[,1],y=consultancy_points@coords[,2], window = window)
+    qc_consultancy <- quadratcount(consultancy_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc_consultancy,col="black")
+    plot(cbd_consultancy,pch=16,cex=0.5, col="darkgreen", add=T)
+  })
+  
+  output$plotAccountancyQuadrat <- renderPlot({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    Accountancy <- industries_sp1[industries_sp1$type=='Accountancy', ]
+    Accountancy_points <- Accountancy[mpsz_svy21,]
+    Accountancy_points <- remove.duplicates(Accountancy)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_Accountancy <- Accountancy_points[cbd,]
+    Accountancy_ppp <- ppp(x=Accountancy_points@coords[,1],y=Accountancy_points@coords[,2], window = window)
+    qc_Accountancy <- quadratcount(Accountancy_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc_Accountancy,col="black")
+    plot(cbd_Accountancy,pch=16,cex=0.5, col="darkorange", add=T)
+  })
+  
+  output$plotArchitecturalQuadrat <- renderPlot({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    architectural <- industries_sp1[industries_sp1$type=='Architectural', ]
+    architectural_points <- architectural[mpsz_svy21,]
+    architectural_points <- remove.duplicates(architectural)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_architectural <- architectural_points[cbd,]
+    architectural_ppp <- ppp(x=architectural_points@coords[,1],y=architectural_points@coords[,2], window = window)
+    qc_architectural <- quadratcount(architectural_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    plot(qc_architectural,col="black")
+    plot(cbd_architectural,pch=16,cex=0.5, col="darkviolet", add=T)
+  })
+  
+  firms_cbd_legal <- reactive({
+    firms <- getFile()
+    firms_legal <- firms[grep("Legal", firms$type), ]
+    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
+    legal_cbd_count <- nrow(legal_cbd)
+    return(legal_cbd_count)
+  })
+  
+  firms_jur_legal <- reactive({
+    firms <- getFile()
+    firms_legal <- firms[grep("Legal", firms$type), ]
+    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
+    legal_jur_count <- nrow(legal_jur)
+    return(legal_jur_count)
+  })
+  
+  firms_cbd_bank <- reactive({
+    firms <- getFile()
+    firms_bank <- firms[grep("Bank", firms$type), ]
+    firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
+    bank_cbd_count <- nrow(bank_cbd)
+    return(bank_cbd_count)
+  })  
+  
+  getBankLQJur <- reactive({
+    firms <- getFile()
+    firms_bank <- firms[grep("Bank", firms$type), ]
+    firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+    bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
+    bank_jur_count <- nrow(bank_jur)
+    return(bank_jur_count)
+  })
+  
+  firms_Jur_Consultancy <- reactive({
+    firms <- getFile()
+    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+    consultancy_jur <- firms_consultancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_consultancy$postal_code), ]
+    consultancy_jur_count <- nrow(consultancy_jur)
+    return(consultancy_jur_count)
+  })
+  
+  firms_cbd_Consultancy <- reactive({
+    firms <- getFile()
+    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+    consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_consultancy$postal_code), ]
+    consultancy_cbd_count <- nrow(consultancy_cbd)
+    return(consultancy_cbd_count)
+  }) 
+  
+  firms_jur_acct <- reactive({
+    firms <- getFile()
+    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+    accountancy_jur <- firms_accountancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_accountancy$postal_code), ]
+    accountancy_jur_count <- nrow(accountancy_jur)
+    return(accountancy_jur_count)
+  })  
+  
+  firms_cbd_acct <- reactive({
+    firms <- getFile()
+    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+    accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
+    accountancy_cbd_count <- nrow(accountancy_cbd)
+    return(accountancy_cbd_count)
+  })  
+  
+  firms_cbd_archi <- reactive({
+    firms <- getFile()
+    firms_architectural <- firms[grep("Architectural", firms$type), ]
+    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+    architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_architectural$postal_code), ]
+    architectural_cbd_count <- nrow(architectural_cbd)
+    return(architectural_cbd_count)
+  })  
+  
+  firms_jur_archi <- reactive({
+    firms <- getFile()
+    firms_architectural <- firms[grep("Architectural", firms$type), ]
+    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+    architectural_jur <- firms_architectural[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_architectural$postal_code), ]
+    architectural_jur_count <- nrow(architectural_jur)
+    return(architectural_jur_count)
+  })  
+  
+  legalFirmsCBDDisplay <- renderUI({
+    strLegalcbd <- paste("<b>Number of Legal firms in CBD:</b> ", firms_cbd_legal(), " ")
+    strLegalJur <- paste("<b>Number of Legal firms in Jurong:</b> ", firms_jur_legal(), " ")
+    HTML(paste(strLegalcbd, strLegalJur, sep = "<br/>"))
   })
 }
 

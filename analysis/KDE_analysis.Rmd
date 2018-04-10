@@ -84,3 +84,13 @@ leaflet() %>%
       addPolylines(data=x)
 ```
 
+```{r}
+firms_legal <- firms[grep("", firms$type), ]
+legal_coy <- st_as_sf(legal_cbd, coords = c("lon", "lat"), crs = 4326)
+l1<-st_transform(legal_coy, 3414)
+shape <- tm_shape(l1) + tm_dots(col = "type", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+?tm_dots
+
+tmap_leaflet(shape)
+```
+
