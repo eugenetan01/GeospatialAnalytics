@@ -32,9 +32,9 @@ industries_shp <- st_as_sf(industries, coords = c("lon","lat"), crs = 4326)
 industries_shp <-st_transform(industries_shp, crs = 3414)
 industries_sp1 = as(industries_shp, 'Spatial')
 industries_sp2 = as(industries_sp1, 'SpatialPoints')
-proj4string(industries_sp2) <- crs.New
-proj4string(mpsz_svy21) <- crs.New
-
+mpsz_svy21 <- spTransform(mpsz, crs.New)
+proj4string(mpsz_svy21)
+proj4string(industries_sp1)
 ```
 
 ```{r}
