@@ -36,6 +36,13 @@ mpsz_svy21 <- spTransform(mpsz, crs.New)
 proj4string(mpsz_svy21)
 proj4string(industries_sp1)
 ```
+```{r}
+legal <- industries_sp1[industries_sp1$type=='Legal', ]
+acct <- industries_sp1[industries_sp1$type=='Accountancy', ]
+arch <- industries_sp1[industries_sp1$type=='Architectural', ]
+bank <- industries_sp1[industries_sp1$type=='Bank', ]
+consult <- industries_sp1[industries_sp1$type=='Consultancy', ]
+```
 
 ```{r}
 # mpsz_svy21 <- spTransform(mpsz, CRS("+init=epsg:3414"))
@@ -52,15 +59,15 @@ proj4string(industries_sp1)
 
 # cbd just run this for cbd
 ```{r}
-firms_points <- firms_svy21[mpsz_svy21,]
-firms_points <- remove.duplicates(firms_svy21)
-plot(mpsz_svy21)
-plot(firms_points,col="blue", pch=20, add=T)
-cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
-plot(cbd)
-cbd_points <- firms_points[cbd,]
-plot(cbd)
-plot(cbd_points,col="blue", pch=20, add=T)
+# firms_points <- firms_svy21[mpsz_svy21,]
+# firms_points <- remove.duplicates(firms_svy21)
+# plot(mpsz_svy21)
+# plot(firms_points,col="blue", pch=20, add=T)
+# cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+# plot(cbd)
+# cbd_points <- firms_points[cbd,]
+# plot(cbd)
+# plot(cbd_points,col="blue", pch=20, add=T)
 ```
 # using csv to run this 
 ```{r}
@@ -137,12 +144,17 @@ plot(cbd_points,col="blue", pch=20, add=T)
  plot(cbd_bank,col="blue", pch=20, add=T)
 ```
 
+```{r}
+window <- as.owin(cbd)
+mycolors = c('red','blue','green','orange','violet')
+```
+
 # to run quadrat analysis on the number of events
 ```{r}
 cbd_points$type <- factor(cbd_points$type)
 levels(cbd_points$type)
-mycolors = c('red','blue','green','orange','violet')
-window <- as.owin(cbd)
+
+
 firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
 qc <- quadratcount(firms_ppp) 
 # qc_10by5 <- quadratcount(firms_ppp, nx = 6, ny = 6) 
@@ -151,10 +163,62 @@ qc <- quadratcount(firms_ppp)
   # plot(cbd_arch,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_cons,pch=16,cex=0.5, col="green", add=T)
   # plot(cbd_acct,pch=16,cex=0.5, col="green", add=T)
-plot(cbd_points,pch=1,cex=0.5, col = mycolors, main="Professional Services in the CBD")
-plot(qc,add=T,col="red")
+plot(qc,col="red")
+plot(cbd_points,pch=1,cex=0.5, col = mycolors, main="Professional Services in the CBD", add=T)
+
 plot(window)
 
 quadrat.test(firms_ppp, method = "M", nsim = 999)
+```
+
+#run below for respective firms plot
+```{r}
+legal_ppp <- ppp(x=legal_points@coords[,1],y=legal_points@coords[,2], window = window)
+qc_legal <- quadratcount(legal_ppp, nx = 5, ny = 5) 
+
+plot(qc_legal,col="red")
+plot(cbd_legal,pch=16,cex=0.5, add=T)
+
+quadrat.test(legal_ppp, method = "M", nsim = 999)
+```
+
+```{r}
+acct_ppp <- ppp(x=acct_points@coords[,1],y=acct_points@coords[,2], window = window)
+qc_acct <- quadratcount(acct_ppp, nx = 5, ny = 5) 
+
+plot(qc_acct,col="red")
+plot(cbd_acct,pch=16,cex=0.5, add=T)
+
+quadrat.test(acct_ppp, method = "M", nsim = 999)
+```
+
+```{r}
+arch_ppp <- ppp(x=arch_points@coords[,1],y=arch_points@coords[,2], window = window)
+qc_arch <- quadratcount(arch_ppp, nx = 5, ny = 5) 
+
+plot(qc_arch,col="red")
+plot(cbd_arch,pch=16,cex=0.5, add=T)
+
+quadrat.test(arch_ppp, method = "M", nsim = 999)
+```
+
+```{r}
+bank_ppp <- ppp(x=bank_points@coords[,1],y=bank_points@coords[,2], window = window)
+qc_bank <- quadratcount(bank_ppp, nx = 5, ny = 5) 
+
+plot(qc_bank,col="red")
+plot(cbd_bank,pch=16,cex=0.5, add=T)
+
+quadrat.test(bank_ppp, method = "M", nsim = 999)
+```
+
+```{r}
+cons_ppp <- ppp(x=cons_points@coords[,1],y=cons_points@coords[,2], window = window)
+qc_cons <- quadratcount(cons_ppp, nx = 5, ny = 5) 
+
+plot(qc_cons,col="red")
+plot(cbd_cons,pch=16,cex=0.5, add=T)
+
+quadrat.test(cons_ppp, method = "M", nsim = 999)
 ```
 
