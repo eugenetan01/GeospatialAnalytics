@@ -14,7 +14,7 @@ library(leaflet)
 ui <- fluidPage(
   mainPanel(
     tabsetPanel(
-      tabPanel("Kernel Density Interactive Map",
+      tabPanel("Map",
         div(class="outer",
            tags$head(
              includeCSS("styles.css")
