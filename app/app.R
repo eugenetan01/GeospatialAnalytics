@@ -228,32 +228,36 @@ ui <- fluidPage(
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Legal') > -1",
                                   column(width = 6, class = "well",
                                          h4("Legal Firms Quadrat Analysis"),
-                                         plotOutput("plotLegalQuadrat")
+                                         plotOutput("plotLegalQuadrat"),
+                                         uiOutput("pvalueLegal")
                                   )), 
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Bank') > -1",
                                   column(width = 6, class="well",
                                          h4("Banks Firms Quadrat Analysis"),
-                                         plotOutput("plotBankQuadrat")
+                                         plotOutput("plotBankQuadrat"),uiOutput("pvalueBank")
                                   )),  
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Consultancy') > -1",
                                   column(width = 6, class="well",
                                          h4("Consultancy Firms Quadrat Analysis"),
-                                         plotOutput("plotConsultancyQuadrat")
+                                         plotOutput("plotConsultancyQuadrat"),
+                                         uiOutput("pvalueConsultancy")
                                   )),    
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Accountancy') > -1",
                                   column(width = 6, class="well",
                                          h4("Accountancy Firms Quadrat Analysis"),
-                                         plotOutput("plotAccountancyQuadrat")
+                                         plotOutput("plotAccountancyQuadrat"),
+                                         uiOutput("pvalueAccountancy")
                                   ))
                  ,
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Architectural') > -1",
                                   column(width = 6, class="well",
                                          h4("Architectural Firms Quadrat Analysis"),
-                                         plotOutput("plotArchitecturalQuadrat")
+                                         plotOutput("plotArchitecturalQuadrat"),
+                                         uiOutput("pvalueArchitectural")
                                   ))      
                ),
                column(width = 12, class = "well",
-                  plotOutput("quadratAll")
+                  plotOutput("quadratAll"), uiOutput("pvalueAll")
                )
                
       )         
@@ -326,7 +330,7 @@ server <- function(session, input, output) {
   
   getSpatialAdjusted <- reactive({
     firms <- getFile()
-    firms <- subset(firms,type>=getInputSector())
+    firms <- subset(firms,type==getInputSector())
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -385,73 +389,68 @@ server <- function(session, input, output) {
   
   output$SPPlot_legal <- renderLeaflet({
     firms1 <- getFile()
-    firms_legal <- subset(firms1,type>="Legal")
+    firms_legal <- subset(firms1,type=="Legal")
     firms_legal$vectorName <- iconv(enc2utf8(firms_legal$vectorName),sub="byte")
     firms_legal$vectorAddress <- iconv(enc2utf8(firms_legal$vectorAddress),sub="byte")
     firms_legal$type <- iconv(enc2utf8(firms_legal$type),sub="byte")
     legal_coy <- st_as_sf(firms_legal, coords = c("lon", "lat"), crs = 4326)
     l1<-st_transform(legal_coy, 3414)
-    shape_legal <- tm_shape(l1) + tm_dots(col = "red", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
-    ?tm_dots
+    shape_legal <- tm_shape(l1) + tm_dots(col = "red")
     tmap_leaflet(shape_legal)
   })
   
   output$SPPlot_bank <- renderLeaflet({
     firms2 <- getFile()
-    firms_bank <- subset(firms2,type>="Bank")
+    firms_bank <- subset(firms2,type=="Bank")
     firms_bank$vectorName <- iconv(enc2utf8(firms_bank$vectorName),sub="byte")
     firms_bank$vectorAddress <- iconv(enc2utf8(firms_bank$vectorAddress),sub="byte")
     firms_bank$type <- iconv(enc2utf8(firms_bank$type),sub="byte")
     bank_coy <- st_as_sf(firms_bank, coords = c("lon", "lat"), crs = 4326)
     l2<-st_transform(bank_coy, 3414)
-    shape_bank <- tm_shape(l2) + tm_dots(col = "blue", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
-    ?tm_dots
+    shape_bank <- tm_shape(l2) + tm_dots(col = "blue")
     tmap_leaflet(shape_bank)
   })
   
   output$SPPlot_con <- renderLeaflet({
     firms3 <- getFile()
-    firms_con <- subset(firms3,type>="Consultancy")
+    firms_con <- subset(firms3,type=="Consultancy")
     firms_con$vectorName <- iconv(enc2utf8(firms_con$vectorName),sub="byte")
     firms_con$vectorAddress <- iconv(enc2utf8(firms_con$vectorAddress),sub="byte")
     firms_con$type <- iconv(enc2utf8(firms_con$type),sub="byte")
     con_coy <- st_as_sf(firms_con, coords = c("lon", "lat"), crs = 4326)
     l3<-st_transform(con_coy, 3414)
-    shape_con <- tm_shape(l3) + tm_dots(col = "green", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
-    ?tm_dots
+    shape_con <- tm_shape(l3) + tm_dots(col = "green")
     tmap_leaflet(shape_con)
   })
   
   output$SPPlot_acct <- renderLeaflet({
     firms <- getFile()
-    firms_act <- subset(firms,type>="Accountancy")
+    firms_act <- subset(firms,type=="Accountancy")
     firms_act$vectorName <- iconv(enc2utf8(firms_act$vectorName),sub="byte")
     firms_act$vectorAddress <- iconv(enc2utf8(firms_act$vectorAddress),sub="byte")
     firms_act$type <- iconv(enc2utf8(firms_act$type),sub="byte")
     ac_coy <- st_as_sf(firms_act, coords = c("lon", "lat"), crs = 4326)
     l4<-st_transform(ac_coy, 3414)
-    shape_a <- tm_shape(l4) + tm_dots(col = "orange", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
-    ?tm_dots
+    shape_a <- tm_shape(l4) + tm_dots(col = "orange")
     tmap_leaflet(shape_a)
   })
   
   output$SPPlot_arch <- renderLeaflet({
     firms5 <- getFile()
-    firms_arch <- subset(firms5,type>="Architectural")
+    firms_arch <- subset(firms5,type=="Architectural")
     firms_arch$vectorName <- iconv(enc2utf8(firms_arch$vectorName),sub="byte")
     firms_arch$vectorAddress <- iconv(enc2utf8(firms_arch$vectorAddress),sub="byte")
     firms_arch$type <- iconv(enc2utf8(firms_arch$type),sub="byte")
     arch_coy <- st_as_sf(firms_arch, coords = c("lon", "lat"), crs = 4326)
     l5<-st_transform(arch_coy, 3414)
-    shape_arch <- tm_shape(l5) + tm_dots(col = "violet", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
-    ?tm_dots
+    shape_arch <- tm_shape(l5) + tm_dots(col = "violet")
     tmap_leaflet(shape_arch)
   })
   
   #Plot KDE for comparison panel
   output$plotLegal <- renderLeaflet({
     firms <- getFile()
-    firms <- subset(firms,type>="Legal")
+    firms <- subset(firms,type=="Legal")
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -480,7 +479,7 @@ server <- function(session, input, output) {
   #Plot KDE Leaflet for banks in comparison view 
   output$plotBank <- renderLeaflet({
     firmsBank <- getFile()
-    firmsBank <- subset(firmsBank,type>="Bank")
+    firmsBank <- subset(firmsBank,type="Bank")
     
     firms_shpBank <- st_as_sf(firmsBank, coords = c("lon", "lat"), crs = 4326)
     firms_shpBank<-st_transform(firms_shpBank, 3414)
@@ -510,7 +509,7 @@ server <- function(session, input, output) {
   #Plot KDE map for consultancy in KDE comparison view 
   output$plotConsultancy <- renderLeaflet({
     firms <- getFile()
-    firms <- subset(firms,type>="Consultancy")
+    firms <- subset(firms,type=="Consultancy")
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -539,7 +538,7 @@ server <- function(session, input, output) {
   output$plotAccountancy <- renderLeaflet({
     # generate bins based on input$bins from ui.R
     firms <- getFile()
-    firms <- subset(firms,type>="Accountancy")
+    firms <- subset(firms,type=="Accountancy")
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -568,7 +567,7 @@ server <- function(session, input, output) {
   #Plot KDE Comparison view for architecture firms 
   output$plotArchitectural <- renderLeaflet({
     firms <- getFile()
-    firms <- subset(firms,type>="Architectural")
+    firms <- subset(firms,type=="Architectural")
     
     firms_shp <- st_as_sf(firms, coords = c("lon", "lat"), crs = 4326)
     firms_shp<-st_transform(firms_shp, 3414)
@@ -953,7 +952,7 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     mycolors = c('red','blue','green','orange','violet')
     firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
-    qc <- quadratcount(firms_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc <- quadratcount(firms_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc,col="red", main="Professional Services in the CBD")
     plot(cbd_points,pch=1,cex=0.5, col = mycolors, add=T)
     legend("topright", 
@@ -979,7 +978,7 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     cbd_legal <- legal_points[cbd,]
     legal_ppp <- ppp(x=legal_points@coords[,1],y=legal_points@coords[,2], window = window)
-    qc_legal <- quadratcount(legal_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc_legal <- quadratcount(legal_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc_legal,col="black")
     plot(cbd_legal,pch=16,cex=0.5, col="red", add=T)
   })
@@ -994,7 +993,7 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     cbd_bank <- bank_points[cbd,]
     bank_ppp <- ppp(x=bank_points@coords[,1],y=bank_points@coords[,2], window = window)
-    qc_bank <- quadratcount(bank_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc_bank <- quadratcount(bank_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc_bank,col="black")
     plot(cbd_bank,pch=16,cex=0.5, col="blue", add=T)
   })
@@ -1009,7 +1008,7 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     cbd_consultancy <- consultancy_points[cbd,]
     consultancy_ppp <- ppp(x=consultancy_points@coords[,1],y=consultancy_points@coords[,2], window = window)
-    qc_consultancy <- quadratcount(consultancy_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc_consultancy <- quadratcount(consultancy_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc_consultancy,col="black")
     plot(cbd_consultancy,pch=16,cex=0.5, col="darkgreen", add=T)
   })
@@ -1024,7 +1023,7 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     cbd_Accountancy <- Accountancy_points[cbd,]
     Accountancy_ppp <- ppp(x=Accountancy_points@coords[,1],y=Accountancy_points@coords[,2], window = window)
-    qc_Accountancy <- quadratcount(Accountancy_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc_Accountancy <- quadratcount(Accountancy_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc_Accountancy,col="black")
     plot(cbd_Accountancy,pch=16,cex=0.5, col="darkorange", add=T)
   })
@@ -1039,110 +1038,190 @@ server <- function(session, input, output) {
     window <- as.owin(cbd)
     cbd_architectural <- architectural_points[cbd,]
     architectural_ppp <- ppp(x=architectural_points@coords[,1],y=architectural_points@coords[,2], window = window)
-    qc_architectural <- quadratcount(architectural_ppp, nx = input$row_quadrat, ny= input$col_quadrat) 
+    qc_architectural <- quadratcount(architectural_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
     plot(qc_architectural,col="black")
     plot(cbd_architectural,pch=16,cex=0.5, col="darkviolet", add=T)
   })
   
-  firms_cbd_legal <- reactive({
-    firms <- getFile()
-    firms_legal <- firms[grep("Legal", firms$type), ]
-    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
-    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
-    legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
-    legal_cbd_count <- nrow(legal_cbd)
-    return(legal_cbd_count)
+  output$pvalueAll <- renderUI({
+    cbd_points <- firmsGetCBDPoints()
+    cbd_points$type <- factor(cbd_points$type)
+    levels(cbd_points$type)
+    cbd <- firmsGetCBDObj()
+    window <- as.owin(cbd)
+    firms_ppp <- ppp(x=cbd_points@coords[,1],y=cbd_points@coords[,2], window = window) 
+    check = quadrat.test(firms_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check$p.value, " "))  
   })
   
-  firms_jur_legal <- reactive({
-    firms <- getFile()
-    firms_legal <- firms[grep("Legal", firms$type), ]
-    firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
-    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
-    legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
-    legal_jur_count <- nrow(legal_jur)
-    return(legal_jur_count)
+  output$pvalueLegal <- renderUI({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    legal <- industries_sp1[industries_sp1$type=='Legal', ]
+    legal_points <- legal[mpsz_svy21,]
+    legal_points <- remove.duplicates(legal)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_legal <- legal_points[cbd,]
+    legal_ppp <- ppp(x=legal_points@coords[,1],y=legal_points@coords[,2], window = window)
+    check1 = quadrat.test(legal_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check1$p.value, " "))  
   })
   
-  firms_cbd_bank <- reactive({
-    firms <- getFile()
-    firms_bank <- firms[grep("Bank", firms$type), ]
-    firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
-    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
-    bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
-    bank_cbd_count <- nrow(bank_cbd)
-    return(bank_cbd_count)
-  })  
-  
-  getBankLQJur <- reactive({
-    firms <- getFile()
-    firms_bank <- firms[grep("Bank", firms$type), ]
-    firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
-    firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
-    bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
-    bank_jur_count <- nrow(bank_jur)
-    return(bank_jur_count)
+  output$pvalueBank <- renderUI({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    bank <- industries_sp1[industries_sp1$type=='Bank', ]
+    bank_points <- bank[mpsz_svy21,]
+    bank_points <- remove.duplicates(bank)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_bank <- bank_points[cbd,]
+    bank_ppp <- ppp(x=bank_points@coords[,1],y=bank_points@coords[,2], window = window)
+    check = quadrat.test(bank_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check$p.value, " "))  
   })
   
-  firms_Jur_Consultancy <- reactive({
-    firms <- getFile()
-    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
-    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
-    consultancy_jur <- firms_consultancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_consultancy$postal_code), ]
-    consultancy_jur_count <- nrow(consultancy_jur)
-    return(consultancy_jur_count)
+  output$pvalueConsultancy <- renderUI({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    Consultancy <- industries_sp1[industries_sp1$type=='Consultancy', ]
+    Consultancy_points <- Consultancy[mpsz_svy21,]
+    Consultancy_points <- remove.duplicates(Consultancy)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_Consultancy <- Consultancy_points[cbd,]
+    Consultancy_ppp <- ppp(x=Consultancy_points@coords[,1],y=Consultancy_points@coords[,2], window = window)
+    check = quadrat.test(Consultancy_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check$p.value, " "))  
   })
   
-  firms_cbd_Consultancy <- reactive({
-    firms <- getFile()
-    firms_consultancy <- firms[grep("Consultancy", firms$type), ]
-    firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
-    consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_consultancy$postal_code), ]
-    consultancy_cbd_count <- nrow(consultancy_cbd)
-    return(consultancy_cbd_count)
-  }) 
-  
-  firms_jur_acct <- reactive({
-    firms <- getFile()
-    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
-    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
-    accountancy_jur <- firms_accountancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_accountancy$postal_code), ]
-    accountancy_jur_count <- nrow(accountancy_jur)
-    return(accountancy_jur_count)
-  })  
-  
-  firms_cbd_acct <- reactive({
-    firms <- getFile()
-    firms_accountancy <- firms[grep("Accountancy", firms$type), ]
-    firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
-    accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
-    accountancy_cbd_count <- nrow(accountancy_cbd)
-    return(accountancy_cbd_count)
-  })  
-  
-  firms_cbd_archi <- reactive({
-    firms <- getFile()
-    firms_architectural <- firms[grep("Architectural", firms$type), ]
-    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
-    architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_architectural$postal_code), ]
-    architectural_cbd_count <- nrow(architectural_cbd)
-    return(architectural_cbd_count)
-  })  
-  
-  firms_jur_archi <- reactive({
-    firms <- getFile()
-    firms_architectural <- firms[grep("Architectural", firms$type), ]
-    firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
-    architectural_jur <- firms_architectural[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_architectural$postal_code), ]
-    architectural_jur_count <- nrow(architectural_jur)
-    return(architectural_jur_count)
-  })  
-  
-  legalFirmsCBDDisplay <- renderUI({
-    strLegalcbd <- paste("<b>Number of Legal firms in CBD:</b> ", firms_cbd_legal(), " ")
-    strLegalJur <- paste("<b>Number of Legal firms in Jurong:</b> ", firms_jur_legal(), " ")
-    HTML(paste(strLegalcbd, strLegalJur, sep = "<br/>"))
+  output$pvalueAccountancy <- renderUI({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    Accountancy <- industries_sp1[industries_sp1$type=='Accountancy', ]
+    Accountancy_points <- Accountancy[mpsz_svy21,]
+    Accountancy_points <- remove.duplicates(Accountancy)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_Accountancy <- Accountancy_points[cbd,]
+    Accountancy_ppp <- ppp(x=Accountancy_points@coords[,1],y=Accountancy_points@coords[,2], window = window)
+    check = quadrat.test(Accountancy_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check$p.value, " "))  
   })
+  
+  output$pvalueArchitectural <- renderUI({
+    industries_sp1 <- firmsSpatialObj()
+    mpsz_svy21 <- mpsz_svy21()
+    Architectural <- industries_sp1[industries_sp1$type=='Architectural', ]
+    Architectural_points <- Architectural[mpsz_svy21,]
+    Architectural_points <- remove.duplicates(Architectural)
+    cbd <- mpsz_svy21[mpsz_svy21@data$REGION_N=="CENTRAL REGION",]
+    window <- as.owin(cbd)
+    cbd_Architectural <- Architectural_points[cbd,]
+    Architectural_ppp <- ppp(x=Architectural_points@coords[,1],y=Architectural_points@coords[,2], window = window)
+    check = quadrat.test(Architectural_ppp, method = "M", nsim = 999)
+    strAr1 <- HTML(paste("<b>P-value:</b> ", check$p.value, " "))  
+  })
+  # firms_cbd_legal <- reactive({
+  #   firms <- getFile()
+  #   firms_legal <- firms[grep("Legal", firms$type), ]
+  #   firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+  #   firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+  #   legal_cbd <- firms_legal[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_legal$postal_code), ]
+  #   legal_cbd_count <- nrow(legal_cbd)
+  #   return(legal_cbd_count)
+  # })
+  # 
+  # firms_jur_legal <- reactive({
+  #   firms <- getFile()
+  #   firms_legal <- firms[grep("Legal", firms$type), ]
+  #   firms_legal <- firms_legal[!duplicated(firms_legal$postal_code),]
+  #   firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+  #   legal_jur <- firms_legal[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_legal$postal_code), ]
+  #   legal_jur_count <- nrow(legal_jur)
+  #   return(legal_jur_count)
+  # })
+  # 
+  # firms_cbd_bank <- reactive({
+  #   firms <- getFile()
+  #   firms_bank <- firms[grep("Bank", firms$type), ]
+  #   firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+  #   firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+  #   bank_cbd <- firms_bank[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_bank$postal_code), ]
+  #   bank_cbd_count <- nrow(bank_cbd)
+  #   return(bank_cbd_count)
+  # })  
+  # 
+  # firms_Jur_bank <- reactive({
+  #   firms <- getFile()
+  #   firms_bank <- firms[grep("Bank", firms$type), ]
+  #   firms_bank <- firms_bank[!duplicated(firms_bank$postal_code),]
+  #   firms <- firms[!duplicated(firms[,c("postal_code","type")]),]
+  #   bank_jur <- firms_bank[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_bank$postal_code), ]
+  #   bank_jur_count <- nrow(bank_jur)
+  #   return(bank_jur_count)
+  # })
+  # 
+  # firms_Jur_Consultancy <- reactive({
+  #   firms <- getFile()
+  #   firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+  #   firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+  #   consultancy_jur <- firms_consultancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_consultancy$postal_code), ]
+  #   consultancy_jur_count <- nrow(consultancy_jur)
+  #   return(consultancy_jur_count)
+  # })
+  # 
+  # firms_cbd_Consultancy <- reactive({
+  #   firms <- getFile()
+  #   firms_consultancy <- firms[grep("Consultancy", firms$type), ]
+  #   firms_consultancy <- firms_consultancy[!duplicated(firms_consultancy$postal_code),]
+  #   consultancy_cbd <- firms_consultancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_consultancy$postal_code), ]
+  #   consultancy_cbd_count <- nrow(consultancy_cbd)
+  #   return(consultancy_cbd_count)
+  # }) 
+  # 
+  # firms_jur_acct <- reactive({
+  #   firms <- getFile()
+  #   firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+  #   firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+  #   accountancy_jur <- firms_accountancy[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_accountancy$postal_code), ]
+  #   accountancy_jur_count <- nrow(accountancy_jur)
+  #   return(accountancy_jur_count)
+  # })  
+  # 
+  # firms_cbd_acct <- reactive({
+  #   firms <- getFile()
+  #   firms_accountancy <- firms[grep("Accountancy", firms$type), ]
+  #   firms_accountancy <- firms_accountancy[!duplicated(firms_accountancy$postal_code),]
+  #   accountancy_cbd <- firms_accountancy[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_accountancy$postal_code), ]
+  #   accountancy_cbd_count <- nrow(accountancy_cbd)
+  #   return(accountancy_cbd_count)
+  # })  
+  # 
+  # firms_cbd_archi <- reactive({
+  #   firms <- getFile()
+  #   firms_architectural <- firms[grep("Architectural", firms$type), ]
+  #   firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+  #   architectural_cbd <- firms_architectural[grep("Singapore 01|Singapore 02|Singapore 03|Singapore 04|Singapore 05|Singapore 06|Singapore 07|Singapore 08|Singapore 14|Singapore 15|Singapore 16|Singapore 09|Singapore 10|Singapore 11|Singapore 120|Singapore 13|Singapore 17|Singapore 18|Singapore 19|Singapore 20|Singapore 21|Singapore 22|Singapore 23|Singapore 24|Singapore 25|Singapore 26|Singapore 27|Singapore 28|Singapore 29|Singapore 30|Singapore 31|Singapore 32|Singapore 33|Singapore 34|Singapore 35|Singapore 36|Singapore 37|Singapore 38|Singapore 39|Singapore 40|Singapore 41|Singapore 42|Singapore 43|Singapore 44|Singapore 45|Singapore 57|Singapore 58|Singapore 59|Singapore 77", firms_architectural$postal_code), ]
+  #   architectural_cbd_count <- nrow(architectural_cbd)
+  #   return(architectural_cbd_count)
+  # })  
+  # 
+  # firms_jur_archi <- reactive({
+  #   firms <- getFile()
+  #   firms_architectural <- firms[grep("Architectural", firms$type), ]
+  #   firms_architectural <- firms_architectural[!duplicated(firms_architectural$postal_code),]
+  #   architectural_jur <- firms_architectural[grep("Singapore 608|Singapore 609|Singapore 6001|Singapore 6002", firms_architectural$postal_code), ]
+  #   architectural_jur_count <- nrow(architectural_jur)
+  #   return(architectural_jur_count)
+  # })  
+  # 
+  # legalFirmsCBDDisplay <- renderUI({
+  #   strLegalcbd <- paste("<b>Number of Legal firms in CBD:</b> ", firms_cbd_legal(), " ")
+  #   strLegalJur <- paste("<b>Number of Legal firms in Jurong:</b> ", firms_jur_legal(), " ")
+  #   HTML(paste(strLegalcbd, strLegalJur, sep = "<br/>"))
+  # })
 }
 
 # Run the application 
