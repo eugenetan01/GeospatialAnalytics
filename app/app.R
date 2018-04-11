@@ -227,7 +227,7 @@ ui <- fluidPage(
                fluidRow(
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Legal') > -1",
                                   column(width = 6, class = "well",
-                                         plotOutput("plotLegalQuadrat")
+                                         plotOutput("plotLegalQuadrat"),uiOutput("pvalueLegal")
                                   )), 
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Bank') > -1",
                                   column(width = 6, class="well",
@@ -235,16 +235,16 @@ ui <- fluidPage(
                                   )),  
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Consultancy') > -1",
                                   column(width = 6, class="well",
-                                         plotOutput("plotConsultancyQuadrat")
+                                         plotOutput("plotConsultancyQuadrat"),uiOutput("pvalueConsultancy")
                                   )),    
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Accountancy') > -1",
                                   column(width = 6, class="well",
-                                         plotOutput("plotAccountancyQuadrat")
+                                         plotOutput("plotAccountancyQuadrat"),uiOutput("pvalueAccountancy")
                                   ))
                  ,
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Architectural') > -1",
                                   column(width = 6, class="well",
-                                         plotOutput("plotArchitecturalQuadrat")
+                                         plotOutput("plotArchitecturalQuadrat"),uiOutput("pvalueArchitectural")
                                   ))      
                ),
                column(width = 12, class = "well",
