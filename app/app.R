@@ -227,31 +227,31 @@ ui <- fluidPage(
                fluidRow(
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Legal') > -1",
                                   column(width = 6, class = "well",
-                                         h4("Legal Firms Quadrat Analysis"),
+                                         #h4("Legal Firms Quadrat Analysis"),
                                          plotOutput("plotLegalQuadrat"),
                                          uiOutput("pvalueLegal")
                                   )), 
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Bank') > -1",
                                   column(width = 6, class="well",
-                                         h4("Banks Firms Quadrat Analysis"),
+                                         #h4("Banks Firms Quadrat Analysis"),
                                          plotOutput("plotBankQuadrat"),uiOutput("pvalueBank")
                                   )),  
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Consultancy') > -1",
                                   column(width = 6, class="well",
-                                         h4("Consultancy Firms Quadrat Analysis"),
+                                         #h4("Consultancy Firms Quadrat Analysis"),
                                          plotOutput("plotConsultancyQuadrat"),
                                          uiOutput("pvalueConsultancy")
                                   )),    
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Accountancy') > -1",
                                   column(width = 6, class="well",
-                                         h4("Accountancy Firms Quadrat Analysis"),
+                                         #h4("Accountancy Firms Quadrat Analysis"),
                                          plotOutput("plotAccountancyQuadrat"),
                                          uiOutput("pvalueAccountancy")
                                   ))
                  ,
                  conditionalPanel(condition="input.quadrat_industry.indexOf('Architectural') > -1",
                                   column(width = 6, class="well",
-                                         h4("Architectural Firms Quadrat Analysis"),
+                                         #h4("Architectural Firms Quadrat Analysis"),
                                          plotOutput("plotArchitecturalQuadrat"),
                                          uiOutput("pvalueArchitectural")
                                   ))      
@@ -371,19 +371,10 @@ server <- function(session, input, output) {
     r<-raster(kde_sp_100)
     crs(r) <- CRS("+init=epsg:3414")
     
-    pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(r),
-                        na.color = "transparent")
-    # 
-    # kde_adj <- setValues(r, getValues(r))
-    # 
-    # summarykdeppp.values <- quantile(na.omit(getValues(kde_adj)), seq(0,1,0.2))
-    # at <- c(summarykdeppp.values[1], summarykdeppp.values[2], summarykdeppp.values[3], summarykdeppp.values[4], summarykdeppp.values[5], summarykdeppp.values[6])
-    # cb <- colorBin(palette = "YlOrRd", bins = at, domain = at, na.color = "#00000000", reverse=FALSE)
-    # 
     leaflet() %>%
       addTiles()%>%
       addRasterImage(r, colors = "Spectral", opacity = 0.4)#%>%
-      #addLegend(pal = cb, values = at, title = "Density Function", position='bottomleft', labFormat = labelFormat(digits=8),layerId="leg")
+
   })
   
   
@@ -395,7 +386,8 @@ server <- function(session, input, output) {
     firms_legal$type <- iconv(enc2utf8(firms_legal$type),sub="byte")
     legal_coy <- st_as_sf(firms_legal, coords = c("lon", "lat"), crs = 4326)
     l1<-st_transform(legal_coy, 3414)
-    shape_legal <- tm_shape(l1) + tm_dots(col = "red")
+    shape_legal <- tm_shape(l1) + tm_dots(col = "red", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots 
     tmap_leaflet(shape_legal)
   })
   
@@ -407,7 +399,8 @@ server <- function(session, input, output) {
     firms_bank$type <- iconv(enc2utf8(firms_bank$type),sub="byte")
     bank_coy <- st_as_sf(firms_bank, coords = c("lon", "lat"), crs = 4326)
     l2<-st_transform(bank_coy, 3414)
-    shape_bank <- tm_shape(l2) + tm_dots(col = "blue")
+    shape_bank <- tm_shape(l2) + tm_dots(col = "blue", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots 
     tmap_leaflet(shape_bank)
   })
   
@@ -419,7 +412,8 @@ server <- function(session, input, output) {
     firms_con$type <- iconv(enc2utf8(firms_con$type),sub="byte")
     con_coy <- st_as_sf(firms_con, coords = c("lon", "lat"), crs = 4326)
     l3<-st_transform(con_coy, 3414)
-    shape_con <- tm_shape(l3) + tm_dots(col = "green")
+    shape_con <- tm_shape(l3) + tm_dots(col = "darkgreen", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots 
     tmap_leaflet(shape_con)
   })
   
@@ -431,7 +425,8 @@ server <- function(session, input, output) {
     firms_act$type <- iconv(enc2utf8(firms_act$type),sub="byte")
     ac_coy <- st_as_sf(firms_act, coords = c("lon", "lat"), crs = 4326)
     l4<-st_transform(ac_coy, 3414)
-    shape_a <- tm_shape(l4) + tm_dots(col = "orange")
+    shape_a <- tm_shape(l4) + tm_dots(col = "darkorange", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots 
     tmap_leaflet(shape_a)
   })
   
@@ -443,7 +438,8 @@ server <- function(session, input, output) {
     firms_arch$type <- iconv(enc2utf8(firms_arch$type),sub="byte")
     arch_coy <- st_as_sf(firms_arch, coords = c("lon", "lat"), crs = 4326)
     l5<-st_transform(arch_coy, 3414)
-    shape_arch <- tm_shape(l5) + tm_dots(col = "violet")
+    shape_arch <- tm_shape(l5) + tm_dots(col = "darkviolet", size=0.02, title = "Firm Type", popup.vars=c("Industry"="type", "Firm Name"="vectorName", "Address"="vectorAddress")) 
+    ?tm_dots 
     tmap_leaflet(shape_arch)
   })
   
@@ -840,7 +836,7 @@ server <- function(session, input, output) {
     values <- c(getLegalLQCBD(), getBankLQCBD(), getConsultancyLQCBD(), getAccountancyLQCBD(), getArchitecturalLQCBD())
     barplot(values,
             main = "Location Quotient in CBD",
-            xlab = "Industry",
+            xlab = "Sector",
             ylab = "Location Quotient",
             names.arg = c("Legal", "Banks", "Consultancy", "Accountancy", "Architectural"),
             col = "darkred")
@@ -849,8 +845,8 @@ server <- function(session, input, output) {
   output$LQPlotJurong <- renderPlot({
     values <- c(getLegalLQJur(), getBankLQJur(), getConsultancyLQJur(), getAccountancyLQJur(), getArchitecturalLQJur())
     barplot(values,
-            main = "Location Quotient in Jurong",
-            xlab = "Industry",
+            main = "Location Quotient in Jurong Lake District",
+            xlab = "Sector",
             ylab = "Location Quotient",
             names.arg = c("Legal", "Banks", "Consultancy", "Accountancy", "Architectural"),
             col = "darkblue")
@@ -858,51 +854,51 @@ server <- function(session, input, output) {
   
   output$lqLegal <- renderUI({
     str3 <- paste("<b>Location Quotient in CBD:</b> ", getLegalLQCBD(), " ")
-    str4 <- paste("<b>Location Quotient in Jurong:</b> ", getLegalLQJur(), " ")
+    str4 <- paste("<b>Location Quotient in Jurong Lake District:</b> ", getLegalLQJur(), " ")
     strl1 <- paste("<b>Number of Legal firms in CBD:</b> ", getLegalCount(), " ")
     strAll <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
-    strl2 <- paste("<b>Number of Legal firms in Jurong:</b> ", getLegalCountJur(), " ")
-    strJur <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    strl2 <- paste("<b>Number of Legal firms in Jurong Lake District:</b> ", getLegalCountJur(), " ")
+    strJur <- paste("<b>Number of firms in Jurong Lake District:</b> ", getAllCompaniesJurong(), " ")
     HTML(paste(str3, str4, strl1, strAll, strl2, strJur, sep = "<br/>"))
   })
   
   output$lqBank <- renderUI({
     strB1 <- paste("<b>Location Quotient in CBD:</b> ", getBankLQCBD(), " ")
-    strB2 <- paste("<b>Location Quotient in Jurong:</b> ", getBankLQJur(), " ")
+    strB2 <- paste("<b>Location Quotient in Jurong Lake District:</b> ", getBankLQJur(), " ")
     strbnum1 <- paste("<b>Number of Banks in CBD:</b> ", getBanksCount(), " ")
     strAllBank <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
-    strbnum2 <- paste("<b>Number of Birms in Jurong:</b> ", getBanksCountJur(), " ")
-    strJurBank <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    strbnum2 <- paste("<b>Number of Birms in Jurong Lake District:</b> ", getBanksCountJur(), " ")
+    strJurBank <- paste("<b>Number of firms in Jurong Lake District:</b> ", getAllCompaniesJurong(), " ")
     HTML(paste(strB1, strB2, strbnum1, strAllBank, strbnum2, strJurBank, sep = "<br/>"))
   })
   
   output$lqConsultancy <- renderUI({
     strC1 <- paste("<b>Location Quotient in CBD:</b> ", getConsultancyLQCBD(), " ")
-    strC2 <- paste("<b>Location Quotient in Jurong:</b> ", getConsultancyLQJur(), " ")
+    strC2 <- paste("<b>Location Quotient in Jurong Lake District:</b> ", getConsultancyLQJur(), " ")
     strcnum1 <- paste("<b>Number of Consultancy Firms in CBD:</b> ", getConsultancyCount(), " ")
     strAllC <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
-    strcnum2 <- paste("<b>Number of Consultancy Firms in Jurong:</b> ", getConsultancyCountJur(), " ")
-    strJurC <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    strcnum2 <- paste("<b>Number of Consultancy Firms in Jurong Lake District:</b> ", getConsultancyCountJur(), " ")
+    strJurC <- paste("<b>Number of firms in Jurong Lake District:</b> ", getAllCompaniesJurong(), " ")
     HTML(paste(strC1, strC2, strcnum1, strAllC, strcnum2, strJurC, sep = "<br/>"))
   })
   
   output$lqAccountancy <- renderUI({
     strA1 <- paste("<b>Location Quotient in CBD:</b> ", getAccountancyLQCBD(), " ")
-    strA2 <- paste("<b>Location Quotient in Jurong:</b> ", getAccountancyLQJur(), " ")
+    strA2 <- paste("<b>Location Quotient in Jurong Lake District:</b> ", getAccountancyLQJur(), " ")
     stranum1 <- paste("<b>Number of Accounting Firms in CBD:</b> ", getAccountancyCount(), " ")
     strAllA <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
-    stranum2 <- paste("<b>Number Accounting Firms in Jurong:</b> ", getAccountancyCountJur(), " ")
-    strJurA <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    stranum2 <- paste("<b>Number Accounting Firms in Jurong Lake District:</b> ", getAccountancyCountJur(), " ")
+    strJurA <- paste("<b>Number of firms in Jurong Lake District:</b> ", getAllCompaniesJurong(), " ")
     HTML(paste(strA1, strA2, stranum1, strAllA, stranum2, strJurA, sep = "<br/>"))
   })
   
   output$lqArchitectural <- renderUI({
     strAr1 <- paste("<b>Location Quotient in CBD:</b> ", getArchitecturalLQCBD(), " ")
-    strAr2 <- paste("<b>Location Quotient in Jurong:</b> ", getArchitecturalLQJur(), " ")
+    strAr2 <- paste("<b>Location Quotient in Jurong Lake District:</b> ", getArchitecturalLQJur(), " ")
     strarcnum1 <- paste("<b>Number of Architectural Firms in CBD:</b> ", getArchitecturalCount(), " ")
     strAllArc <- paste("<b>Number of firms in CBD:</b> ", getAllCompaniesCBD(), " ")
     strarcnum2 <- paste("<b>Number of Architectural Firms in Jurong:</b> ", getArchitecturalCountJur(), " ")
-    strJurArc <- paste("<b>Number of firms in Jurong:</b> ", getAllCompaniesJurong(), " ")
+    strJurArc <- paste("<b>Number of firms in Jurong Lake District:</b> ", getAllCompaniesJurong(), " ")
     HTML(paste(strAr1, strAr2,strarcnum1, strAllArc, strarcnum2, strJurArc, sep = "<br/>"))
   })
   
@@ -959,7 +955,7 @@ server <- function(session, input, output) {
            legend = c("Legal", "Banks", "Consultancy", "Accountancy", "Architectural"), 
            col = c("red", "blue", "darkgreen", "darkorange", "darkviolet"),
            rgb(0.8,0.4,0.1,0.7), 
-           pch = c(17,19), 
+           pch = c(17), 
            bty = "n", 
            pt.cex = 2, 
            cex = 1.2, 
@@ -979,7 +975,7 @@ server <- function(session, input, output) {
     cbd_legal <- legal_points[cbd,]
     legal_ppp <- ppp(x=legal_points@coords[,1],y=legal_points@coords[,2], window = window)
     qc_legal <- quadratcount(legal_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
-    plot(qc_legal,col="black")
+    plot(qc_legal,col="black", main="Legal firms in the CBD")
     plot(cbd_legal,pch=16,cex=0.5, col="red", add=T)
   })
   
@@ -994,7 +990,7 @@ server <- function(session, input, output) {
     cbd_bank <- bank_points[cbd,]
     bank_ppp <- ppp(x=bank_points@coords[,1],y=bank_points@coords[,2], window = window)
     qc_bank <- quadratcount(bank_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
-    plot(qc_bank,col="black")
+    plot(qc_bank,col="black",main="Banking firms in the CBD")
     plot(cbd_bank,pch=16,cex=0.5, col="blue", add=T)
   })
   
@@ -1009,7 +1005,7 @@ server <- function(session, input, output) {
     cbd_consultancy <- consultancy_points[cbd,]
     consultancy_ppp <- ppp(x=consultancy_points@coords[,1],y=consultancy_points@coords[,2], window = window)
     qc_consultancy <- quadratcount(consultancy_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
-    plot(qc_consultancy,col="black")
+    plot(qc_consultancy,col="black",main="Consultancy firms in the CBD")
     plot(cbd_consultancy,pch=16,cex=0.5, col="darkgreen", add=T)
   })
   
@@ -1024,7 +1020,7 @@ server <- function(session, input, output) {
     cbd_Accountancy <- Accountancy_points[cbd,]
     Accountancy_ppp <- ppp(x=Accountancy_points@coords[,1],y=Accountancy_points@coords[,2], window = window)
     qc_Accountancy <- quadratcount(Accountancy_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
-    plot(qc_Accountancy,col="black")
+    plot(qc_Accountancy,col="black",main="Accountancy firms in the CBD")
     plot(cbd_Accountancy,pch=16,cex=0.5, col="darkorange", add=T)
   })
   
@@ -1039,7 +1035,7 @@ server <- function(session, input, output) {
     cbd_architectural <- architectural_points[cbd,]
     architectural_ppp <- ppp(x=architectural_points@coords[,1],y=architectural_points@coords[,2], window = window)
     qc_architectural <- quadratcount(architectural_ppp, nx = input$col_quadrat, ny= input$row_quadrat) 
-    plot(qc_architectural,col="black")
+    plot(qc_architectural,col="black",main="Architectural firms in the CBD")
     plot(cbd_architectural,pch=16,cex=0.5, col="darkviolet", add=T)
   })
   
