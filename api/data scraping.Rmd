@@ -1,0 +1,368 @@
+---
+title: "web scraping"
+output: html_document
+---
+
+
+```{r}
+library(rvest)
+library(stringr)
+
+count = 0
+for(number in 1:50){
+
+        # Create page address
+        page = paste('http://www.yellowpages.com.sg/category/lawyers/?page', '=', number)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(webpage)
+
+        # Get values
+        name  <- webpage %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+        print(head(name))
+
+        address <- webpage %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+        print(head(address))
+        
+        
+
+        # Store data
+        if(count == 0){
+
+                vectorName <- name
+                vectorAddress <- address
+                
+        }else{
+
+                vectorName <- c(vectorName, name)
+                vectorAddress <- c(vectorAddress, address)
+        
+
+        }
+
+        count = count + 1
+
+}
+
+length(vectorName)
+length(vectorAddress)
+
+
+```
+
+
+```{r}
+library(readr)
+library(tibble)
+df = data.frame(vectorName, vectorAddress)
+glimpse(df)
+
+write_csv(df, "legal.csv")
+
+
+```
+
+# Scrap banks
+
+```{r}
+library(rvest)
+library(stringr)
+library(readr)
+
+
+count = 0
+for(number in 1:13){
+
+        # Create page address
+        page = paste('http://www.yellowpages.com.sg/category/banks/?page', '=', number)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(webpage)
+
+        # Get values
+        name  <- webpage %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+        print(head(name))
+
+        address <- webpage %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+        print(head(address))
+        
+        
+
+        # Store data
+        if(count == 0){
+
+                vectorName <- name
+                vectorAddress <- address
+                
+        }else{
+
+                vectorName <- c(vectorName, name)
+                vectorAddress <- c(vectorAddress, address)
+        
+
+        }
+
+        count = count + 1
+
+}
+
+length(vectorName)
+length(vectorAddress)
+
+df = data.frame(vectorName, vectorAddress)
+write_csv(df, "bank.csv")
+
+```
+
+# accountancy
+
+```{r}
+library(rvest)
+library(stringr)
+library(readr)
+
+
+count = 0
+for(number in 1:44){
+
+        # Create page address
+        page = paste('http://www.yellowpages.com.sg/search/all/Accountancy/?page', '=', number)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(webpage)
+
+        # Get values
+        name  <- webpage %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+        print(head(name))
+
+        address <- webpage %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+        print(head(address))
+        
+        
+
+        # Store data
+        if(count == 0){
+
+                vectorName <- name
+                vectorAddress <- address
+                
+        }else{
+
+                vectorName <- c(vectorName, name)
+                vectorAddress <- c(vectorAddress, address)
+        
+
+        }
+
+        count = count + 1
+
+}
+
+length(vectorName)
+length(vectorAddress)
+
+df = data.frame(vectorName, vectorAddress)
+write_csv(df, "acct.csv")
+```
+
+# achitecture
+
+```{r}
+library(rvest)
+library(stringr)
+library(readr)
+
+
+count = 0
+for(number in 1:27){
+
+        # Create page address
+        page = paste('http://www.yellowpages.com.sg/search/all/Architectural/?page', '=', number)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(webpage)
+
+        # Get values
+        name  <- webpage %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+        print(head(name))
+
+        address <- webpage %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+        print(head(address))
+        
+        
+
+        # Store data
+        if(count == 0){
+
+                vectorName <- name
+                vectorAddress <- address
+                
+        }else{
+
+                vectorName <- c(vectorName, name)
+                vectorAddress <- c(vectorAddress, address)
+        
+
+        }
+
+        count = count + 1
+
+}
+
+length(vectorName)
+length(vectorAddress)
+
+df = data.frame(vectorName, vectorAddress)
+write_csv(df, "Architectural.csv")
+```
+
+
+# http://www.yellowpages.com.sg/search/all/Management+Consultancy
+
+```{r}
+library(rvest)
+library(stringr)
+library(readr)
+
+
+count = 0
+for(number in 1:12){
+
+        # Create page address
+        page = paste('http://www.yellowpages.com.sg/search/all/Management+Consultancy/?page', '=', number)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(webpage)
+
+        # Get values
+        name  <- webpage %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+        print(head(name))
+
+        address <- webpage %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+        print(head(address))
+        
+        
+
+        # Store data
+        if(count == 0){
+
+                vectorName <- name
+                vectorAddress <- address
+                
+        }else{
+
+                vectorName <- c(vectorName, name)
+                vectorAddress <- c(vectorAddress, address)
+        
+
+        }
+
+        count = count + 1
+
+}
+
+length(vectorName)
+length(vectorAddress)
+
+df = data.frame(vectorName, vectorAddress)
+write_csv(df, "Consultancy.csv")
+```
+
+
+
+```{r}
+
+```
+
+
+```{r}
+library(rvest)
+library(stringr)
+
+# Each page display 20 items of 1392, we will review each of them, 
+count = 0
+start = 1
+end = 20
+
+for(numPage in 1:50){
+
+        # Create and read the page address
+        page = paste('http://www.yellowpages.com.sg/search/all/legal/?page', '=', numPage)
+        nPage <- str_replace_all(page, pattern=" ", repl="")
+        webpage <- read_html(nPage)
+
+        print(paste('Reading the page', nPage, '\n'))
+
+
+        # Read the 20 items of the page
+         for(numItem in 1:20){
+
+                print(paste(' -- Reading the item', numItem, ' on page', numPage))
+
+                item =  paste('item', numItem, sep = "", collapse = NULL)
+                xPath <- paste('//*[@id=',item, ']', sep = "'", collapse = NULL)
+
+                # read the path
+                readPath <- nPage %>% read_html() %>% html_nodes(xpath = xPath)
+
+                # Get values
+                name  <- readPath %>% html_nodes(".normal_title") %>% html_text(trim = TRUE)
+                lengthName <- length(name)
+
+                address <- readPath %>% html_nodes(".mapItem") %>% html_text(trim = TRUE)
+                lengthAddress <- length(address)
+
+                bDescription <- readPath %>% html_nodes(".com_business_card") %>% html_text(trim = TRUE)
+                lengthDesc <- length(bDescription)
+
+                if(lengthName == 0){
+
+                        name = 'NA'
+
+                }
+
+                if(lengthDesc == 0){
+
+                        lengthAddress = 'NA'
+
+                }
+
+                if(lengthDesc == 0){
+
+                        bDescription = 'NA'
+
+                }
+
+                # Store variables
+                if(count == 0){
+
+                        vectorName <- name
+                        vectorAddress <- address
+                        vectorDescription <- bDescription
+                }else{
+
+                        vectorName <- c(vectorName, name)
+                        vectorAddress <- c(vectorAddress, address)
+                        vectorDescription <- c(vectorDescription, bDescription)
+
+                }
+
+
+                count = count + 1
+
+        }
+
+
+}
+
+
+df = data.frame(vectorName, vectorAddress,vectorDescription)
+write.csv(df, "legal2.csv")
+```
+
+
