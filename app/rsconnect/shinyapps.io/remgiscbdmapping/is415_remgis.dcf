@@ -5,8 +5,9 @@ account: remgiscbdmapping
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 319539
-bundleId: 1313406
+bundleId: 1313774
 url: https://remgiscbdmapping.shinyapps.io/is415_remgis/
-when: 1523444511.32556
+when: 1523457607.78048
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: gomap.js
