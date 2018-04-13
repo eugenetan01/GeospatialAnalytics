@@ -259,14 +259,20 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(session, input, output) {
    
-  packages = c('leaflet.minicharts', 'manipulateWidget', 'ggmap', 'ggplot2', 'tmap', 'sf', 'rgdal', 'maptools', 'spatstat', 'amap', 'REAT', 'dplyr', 'gridExtra')
-  for(p in packages){
-    if(!require(p, character.only = T)){
-      install.packages(p)
-    }
-    library(p,character.only = T)
-  }
-  
+  # packages = c('leaflet.minicharts', 'manipulateWidget', 'ggmap', 'ggplot2', 'tmap', 'sf', 'rgdal', 'maptools', 'spatstat', 'amap', 'REAT', 'dplyr', 'gridExtra')
+  # for(p in packages){
+  #   if(!require(p, character.only = T)){
+  #     install.packages(p)
+  #   }
+  #   library(p,character.only = T)
+  # }
+  # 
+  library(dplyr)
+  library(spatstat)
+  library(rgdal)
+  library(amap)
+  library(REAT)
+  library(maptools)
   library(ggmap)
   library(ggplot2)
   library(tmap)
